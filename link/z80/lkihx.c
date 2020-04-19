@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <alloc.h>
 #include "aslink.h"
 
 /*)Module	lkihx.c
@@ -102,10 +101,9 @@
  *		The data is output to the file defined by ofp.
  */
 
-VOID
-ihx(i)
+void ihx(int i)
 {
-	register Addr_T chksum;
+	Addr_T chksum;
 
 	if (i) {
 		if (hilo == 0) {

@@ -92,8 +92,7 @@ int buildlibraryindex();
  *		An lbpath structure may be created.
  */
 
-VOID
-addpath()
+void addpath(void)
 {
 	struct lbpath *lbph, *lbp;
 
@@ -137,8 +136,7 @@ addpath()
  *		the library search list.
  */
 
-VOID
-addlib()
+void addlib(void)
 {
 	struct lbpath *lbph;
 
@@ -187,10 +185,7 @@ addlib()
  *		An lbname structure may be created.
  */
 
-VOID
-addfile(path,libfil)
-char *path;
-char *libfil;
+void addfile(char *path, char *libfil)
 {
 	FILE *fp;
 	char *str;
@@ -285,11 +280,10 @@ char *libfil;
  *		containing the symbol will be imported and linked.
  */
 
-VOID
-search()
+void search(void)
 {
-	register struct sym *sp;
-	register int i, symfnd;
+	struct sym *sp;
+	int i, symfnd;
 
 	/*
 	 * Look for undefined symbols.  Keep
@@ -400,7 +394,7 @@ search()
 /* First entry in the library object symbol cache */
 mlibraryfile libr;
 
-int fndsym( char *name )
+int fndsym(char *name)
 {
 	struct lbfile *lbfh, *lbf;
 	pmlibraryfile ThisLibr;
@@ -450,7 +444,7 @@ int fndsym( char *name )
  *			the libraries
  */
 
-int buildlibraryindex()
+int buildlibraryindex(void)
 {
 	FILE *libfp, *fp;
 	struct lbname *lbnh;
@@ -590,9 +584,7 @@ int buildlibraryindex()
 }
 #else /* INDEXLIB */
 
-int
-fndsym(name)
-char *name;
+int fndsym(char *name)
 {
 	FILE *libfp, *fp;
 	struct lbname *lbnh;
@@ -753,8 +745,7 @@ char *name;
  *		Links all files contained in the lbfile structures.
  */
 
-VOID
-library()
+void library(void)
 {
 	struct lbfile *lbfh;
 
@@ -788,9 +779,7 @@ library()
  *		If file exists it is linked.
  */
 
-VOID
-loadfile(filspc)
-char *filspc;
+void loadfile(char *filspc)
 {
 	FILE *fp;
 	char str[NINPUT+2];

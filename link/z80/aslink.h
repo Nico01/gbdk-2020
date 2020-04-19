@@ -655,7 +655,7 @@ extern	VOID		newhead();
 /* lksym.c */
 extern	int		hash();
 extern	struct	sym *	lkpsym();
-extern	VOID *		new();
+extern	char *new();
 extern	struct	sym *	newsym();
 extern	VOID		symdef();
 extern	int		symeq();
@@ -688,7 +688,7 @@ extern	Addr_T		adw_hi();
 extern	Addr_T		adw_lo();
 extern	Addr_T		evword();
 extern	VOID		rele();
-extern	VOID		reloc();
+extern	void reloc(char c);
 extern	VOID		relt();
 extern	VOID		relr();
 extern	VOID		relp();

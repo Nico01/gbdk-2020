@@ -56,11 +56,9 @@
  *		The page line and the page count may be updated.
  */
 
-VOID
-slew(fp)
-FILE *fp;
+void slew(FILE *fp)
 {
-	register int i;
+	int i;
 
 	if (lop++ >= NLPP) {
 		newpag(fp);
@@ -102,9 +100,7 @@ FILE *fp;
  *		The page and line counters are updated.
  */
 
-VOID
-newpag(fp)
-FILE *fp;
+void newpag(FILE *fp)
 {
 	fprintf(fp, "\fASxxxx Linker %s,  page %u.\n", VERSION, ++page);
 	lop = 1;
@@ -157,14 +153,12 @@ FILE *fp;
  */
 
 #ifndef MLH_MAP
-VOID
-lstarea(xp)
-struct area *xp;
+void lstarea(struct area *xp)
 {
-	register struct area *op;
-	register struct areax *oxp;
-	register c, i, j;
-	register char *ptr;
+	struct area *op;
+	struct areax *oxp;
+	int c, i, j;
+	char *ptr;
 	int nmsym;
 	Addr_T a0, ai, aj;
 	struct sym *sp;
@@ -332,10 +326,10 @@ struct area *xp;
 	free(p);
 }
 #else
-VOID lstarea(struct area *xp)
+void lstarea(struct area *xp)
 {
-	register struct areax *oxp;
-	register int i, j;
+	struct areax *oxp;
+	int i, j;
 	int nmsym;
 	Addr_T a0, ai = 0, aj = 0;
 	struct sym *sp;
@@ -504,13 +498,11 @@ VOID lstarea(struct area *xp)
  *		Map output generated.
  */
 
-VOID
-lstarea(xp)
-struct area *xp;
+void lstarea(struct area *xp)
 {
-	register struct areax *oxp;
-	register c, i, j;
-	register char *ptr;
+	struct areax *oxp;
+	int c, i, j;
+	char *ptr;
 	int nmsym;
 	Addr_T a0, ai, aj;
 	struct sym *sp;
@@ -672,11 +664,11 @@ struct area *xp;
 #endif
 
 #ifdef SDK
-VOID lstareatosym(struct area *xp)
+void lstareatosym(struct area *xp)
 {
 	/* Output the current area symbols to a NO$GMB .sym file */
-	register struct areax *oxp;
-	register int i, j;
+	struct areax *oxp;
+	int i, j;
 	int nmsym;
 	Addr_T a0, ai;
 	struct sym *sp;
@@ -814,9 +806,7 @@ VOID lstareatosym(struct area *xp)
  *		file associated with a .rel file.
  */
 
-VOID
-lkulist(i)
-int i;
+void lkulist(int i)
 {
 	Addr_T pc;
 
@@ -861,10 +851,10 @@ int i;
 	 */
 	} else {
 		if (gline == 0)
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 
 		while (fgets(rb, sizeof(rb), tfp) != 0) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 		}
 		fclose(tfp);
 		tfp = NULL;
@@ -917,9 +907,7 @@ int i;
  *		updated to reflect the program relocation.
  */
 
-VOID
-lkalist(pc)
-Addr_T pc;
+void lkalist(Addr_T pc)
 {
 	char str[8];
 	int i;
@@ -934,7 +922,7 @@ loop:	if (tfp == NULL)
 	 * Copy current LST to RST
 	 */
 	if (gline == 0) {
-		fprintf(rfp, rb);
+		fprintf(rfp, "%s", rb);
 		gline = 1;
 	}
 
@@ -960,7 +948,7 @@ loop:	if (tfp == NULL)
 	 * Must have an ASxxxx Listing line number
 	 */
 	if (!dgt(RAD10, &rb[30], 1)) {
-		fprintf(rfp, rb);
+		fprintf(rfp, "%s", rb);
 		goto loop;
 	}
 
@@ -969,7 +957,7 @@ loop:	if (tfp == NULL)
 	 */
 	if (radix == 16) {
 		if (!dgt(RAD16, &rb[3], 4)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			goto loop;
 		}
 		sprintf(str, "%04X", pc);
@@ -977,7 +965,7 @@ loop:	if (tfp == NULL)
 	} else
 	if (radix == 10) {
 		if (!dgt(RAD10, &rb[3], 5)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			goto loop;
 		}
 		sprintf(str, "%05d", pc);
@@ -985,7 +973,7 @@ loop:	if (tfp == NULL)
 	} else
 	if (radix == 8) {
 		if (!dgt(RAD8, &rb[3], 6)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			goto loop;
 		}
 		sprintf(str, "%06o", pc);
@@ -995,7 +983,7 @@ loop:	if (tfp == NULL)
 	/*
 	 * Copy updated LST text line to RST
 	 */
-	fprintf(rfp, rb);
+	fprintf(rfp, "%s", rb);
 	gcntr = 0;
 }
 
@@ -1044,10 +1032,7 @@ loop:	if (tfp == NULL)
  *		with updated data values and code addresses.
  */
 
-VOID
-lkglist(pc,v)
-Addr_T pc;
-int v;
+void lkglist(Addr_T pc, int v)
 {
 	char str[8];
 	int i;
@@ -1085,7 +1070,7 @@ loop:	if (tfp == NULL)
 		 */
 		if (gcntr != -1) {
 			if (!dgt(RAD10, &rb[30], 1)) {
-				fprintf(rfp, rb);
+				fprintf(rfp, "%s", rb);
 				goto loop;
 			}
 			gcntr = 0;
@@ -1109,7 +1094,7 @@ loop:	if (tfp == NULL)
 		 * Number must be of proper radix
 		 */
 		if (!dgt(RAD16, rp, 2)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			goto loop;
 		}
@@ -1134,7 +1119,7 @@ loop:	if (tfp == NULL)
 		 * Output text line when updates finished
 		 */
 		if (++gcntr == 6) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			gcntr = -1;
 		}
@@ -1155,7 +1140,7 @@ loop:	if (tfp == NULL)
 		 * Number must be of proper radix
 		 */
 		if (!dgt(RAD10, rp, 3)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			goto loop;
 		}
@@ -1180,7 +1165,7 @@ loop:	if (tfp == NULL)
 		 * Output text line when updates finished
 		 */
 		if (++gcntr == 4) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			gcntr = -1;
 		}
@@ -1201,7 +1186,7 @@ loop:	if (tfp == NULL)
 		 * Number must be of proper radix
 		 */
 		if (!dgt(RAD8, rp, 3)) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			goto loop;
 		}
@@ -1226,7 +1211,7 @@ loop:	if (tfp == NULL)
 		 * Output text line when updates finished
 		 */
 		if (++gcntr == 4) {
-			fprintf(rfp, rb);
+			fprintf(rfp, "%s", rb);
 			gline = 1;
 			gcntr = -1;
 		}
@@ -1255,10 +1240,7 @@ loop:	if (tfp == NULL)
  *		none
  */
 
-int
-dgt(rdx, str, n)
-int rdx, n;
-char *str;
+int dgt(int rdx, char *str, int n)
 {
 	int i;
 

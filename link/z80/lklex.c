@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <alloc.h>
 #include "aslink.h"
 
 /*)Module	lklex.c
@@ -79,12 +78,10 @@
  *		input text line.
  */
 
-VOID
-getid(id, c)
-register int c;
-char *id;
+
+void getid(char *id, int c)
 {
-	register char *p;
+	char *p;
 
 	if (c < 0) {
 		c = getnb();
@@ -132,12 +129,9 @@ char *id;
  *		the position in the current input text line.
  */
 
-VOID
-getfid(str, c)
-register int c;
-char *str;
+void getfid(char *str, int c)
 {
-	register char *p;
+	char *p;
 
 	p = str;
 	do {
@@ -172,10 +166,9 @@ char *str;
  *		in the current input text line
  */
 
-char
-getnb()
+char getnb(void)
 {
-	register int c;
+	int c;
 
 	while ((c=get())==' ' || c=='\t')
 		;
@@ -203,9 +196,7 @@ getnb()
  *		Input letters and digits are skipped.
  */
 
-VOID
-skip(c)
-register int c;
+void skip(int c)
 {
 	if (c < 0)
 		c = getnb();
@@ -236,10 +227,9 @@ register int c;
  *		line, ip is not updated.
  */
 
-char
-get()
+char get(void)
 {
-	register int c;
+	int c;
 
 	if ((c = *ip) != 0)
 		++ip;
@@ -274,8 +264,7 @@ get()
  *		ip decremented by 1 character position
  */
 
-VOID
-unget(c)
+void unget(int c)
 {
 	if (c != 0)
 		--ip;
@@ -312,10 +301,9 @@ unget(c)
  *		in the current input text line
  */
 
-int
-getmap(d)
+int getmap(int d)
 {
-	register int c, n, v;
+	int c, n, v;
 
 	if ((c = get()) == '\0')
 		return (-1);
@@ -420,11 +408,10 @@ getmap(d)
  *		opened and closed sequentially scanning each in turn.
  */
 
-int
-getLine_()
+int getLine_(void)
 {
-	register int i, ftype;
-	register char *fid;
+	int i, ftype;
+	char *fid;
 
 loop:	if (pflag && cfp && cfp->f_type == F_STD)
 		fprintf(stdout, "ASlink >> ");
@@ -527,10 +514,9 @@ loop:	if (pflag && cfp && cfp->f_type == F_STD)
  *		the position in the current input text line
  */
 
-int
-more()
+int more(void)
 {
-	register int c;
+	int c;
 
 	c = getnb();
 	unget(c);
@@ -559,10 +545,9 @@ more()
  *		position in the current input text line.
  */
 
-char
-endline()
+char endline(void)
 {
-	register int c;
+	int c;
 
 	c = getnb();
 	return( (c == '\0' || c == ';') ? 0 : c );

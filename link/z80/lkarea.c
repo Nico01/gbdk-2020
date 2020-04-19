@@ -96,10 +96,9 @@
  *   `-------------------------  ap->a_id
  *
  */
-VOID
-newarea()
+void newarea(void)
 {
-	register int i, narea;
+	int i, narea;
 	struct areax *taxp;
 	struct areax **halp;
 	char id[NCPS];
@@ -186,12 +185,10 @@ newarea()
  *		will terminate the linker.
  */
 
-VOID
-lkparea(id)
-char *id;
+void lkparea(char *id)
 {
-	register struct area *tap;
-	register struct areax *taxp;
+	struct area *tap;
+	struct areax *taxp;
 
 	ap = areap;
 	axp = (struct areax *) new (sizeof(struct areax));
@@ -308,10 +305,9 @@ char *id;
 /*
  * Resolve all area addresses.
  */
-VOID
-lnkarea()
+void lnkarea(void)
 {
-	register int rloc;
+	int rloc;
 	char temp[NCPS];
 	struct sym *sp;
 
@@ -385,12 +381,10 @@ lnkarea()
  *		and linked into the structures.
  */
 
-VOID
-lnksect(tap)
-register struct area *tap;
+void lnksect(struct area *tap)
 {
-	register Addr_T size, addr;
-	register struct areax *taxp;
+	Addr_T size, addr;
+	struct areax *taxp;
 
 	size = 0;
 	addr = tap->a_addr;

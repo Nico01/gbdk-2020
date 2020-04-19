@@ -158,12 +158,10 @@ char *default_globlp[] = {
 };
 #endif /* GAMEBOY */
 
-int
-main(argc, argv)
-char *argv[];
+int main(int argc, char *argv[])
 {
-	register char *p;
-	register int c, i;
+	char *p;
+	int c, i;
 
 #ifdef GAMEBOY
 	nb_rom_banks = 2;
@@ -407,9 +405,7 @@ char *argv[];
  *		All files closed. Program terminates.
  */
 
-VOID 
-lkexit(i)
-int i;
+void lkexit(int i)
 {
 	if (mfp != NULL) fclose(mfp);
 	if (ofp != NULL) fclose(ofp);
@@ -450,10 +446,9 @@ int i;
  *		the radix is set as the .rel file(s) are read.
  */
 
-VOID
-link()
+void link(void )
 {
-	register int c;
+	int c;
 
 	if ((c=endline()) == 0) { return; }
 	switch (c) {
@@ -582,12 +577,11 @@ link()
  */
 
 #ifndef MLH_MAP
-VOID
-map()
+void map(void)
 {
-	register i;
-	register struct head *hdp;
-	register struct lbfile *lbfh;
+	int i;
+	struct head *hdp;
+	struct lbfile *lbfh;
 
 	/*
 	 * Open Map File
@@ -683,10 +677,10 @@ map()
 	symdef(mfp);
 }
 #else
-VOID map()
+void map(void)
 {
-	register struct head *hdp;
-	register struct lbfile *lbfh;
+	struct head *hdp;
+	struct lbfile *lbfh;
 
 	/*
 	 * Open Map File
@@ -776,9 +770,9 @@ VOID map()
 
 #ifdef SDK
 /* PENDING */
-VOID lstareatosym(struct area *xp);
+void lstareatosym(struct area *xp);
 
-VOID sym()
+void sym(void)
 {
 	/*
 	 * Open sym File
@@ -848,10 +842,9 @@ VOID sym()
  *		structure lfile is created.
  */
 
-int
-parse()
+int parse(void)
 {
-	register int c;
+	int c;
 	char fid[NINPUT];
 
 	while ((c = getnb()) != 0) {
@@ -1034,8 +1027,7 @@ parse()
  *		The basep structure is created.
  */
 
-VOID
-bassav()
+void bassav(void)
 {
 	if (basep == NULL) {
 		basep = (struct base *)
@@ -1085,10 +1077,9 @@ bassav()
  *		The base address of an area is set.
  */
 
-VOID
-setbas()
+void setbas(void)
 {
-	register int v;
+	int v;
 	char id[NCPS];
 
 	bsp = basep;
@@ -1146,8 +1137,7 @@ setbas()
  *		The globlp structure is created.
  */
 
-VOID
-gblsav()
+void gblsav(void)
 {
 	if (globlp == NULL) {
 		globlp = (struct globl *)
@@ -1195,11 +1185,10 @@ gblsav()
  *		The value of a variable is set.
  */
 
-VOID
-setgbl()
+void setgbl(void)
 {
-	register int v;
-	register struct sym *sp;
+	int v;
+	struct sym *sp;
 	char id[NCPS];
 
 	gsp = globlp;
@@ -1274,13 +1263,10 @@ setgbl()
  *		File is opened for read or write.
  */
 
-FILE *
-afile(fn, ft, wf)
-char *fn;
-char *ft;
+FILE *afile(char *fn, char *ft, int wf)
 {
-	register char *p1, *p2, *p3;
-	register int c;
+	char *p1, *p2, *p3;
+	int c;
 	FILE *fp;
 	char fb[FILSPC];
 
@@ -1399,10 +1385,9 @@ char *usetxt[] = {
  *		none
  */
 
-VOID
-usage()
+void usage(void)
 {
-	register char	**dp;
+	char **dp;
 
 	fprintf(stderr, "\nASxxxx Linker %s\n\n", VERSION);
 	for (dp = usetxt; *dp; dp++)

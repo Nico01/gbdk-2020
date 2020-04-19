@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <alloc.h>
 #include "aslink.h"
 
 /*)Module	lks19.c
@@ -94,10 +93,9 @@
  *		The data is output to the file defined by ofp.
  */
 
-VOID
-s19(i)
+void s19(int i)
 {
-	register Addr_T chksum;
+	Addr_T chksum;
 
 	if (i) {
 		if (hilo == 0) {

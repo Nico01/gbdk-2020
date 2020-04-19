@@ -34,7 +34,7 @@ char cart_name[16] = "";
 
 patch* patches = NULL;
 
-VOID gb(int in)
+void gb(int in)
 {
   static int first = 1;
   unsigned long pos, chk;

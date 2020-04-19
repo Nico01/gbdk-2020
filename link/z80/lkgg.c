@@ -24,7 +24,7 @@ unsigned char *cart[NBSEG];
 
 int current_rom_bank;
 
-VOID gg(int in)
+void gg(int in)
 {
   static int first = 1;
   unsigned long pos;

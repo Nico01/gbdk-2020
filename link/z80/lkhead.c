@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <alloc.h>
 #include "aslink.h"
 
 /*Module	lkhead.c
@@ -72,10 +71,9 @@
  *   `------------ hp->h_narea
  *
  */
-VOID
-newhead()
+void newhead(void)
 {
-	register int i;
+	int i;
 	struct head *thp;
 
 	hp = (struct head *) new (sizeof(struct head));
@@ -139,8 +137,8 @@ newhead()
 /*
  * Module Name
  */
-VOID
-module()
+
+void module(void)
 {
 	char id[NCPS];
 

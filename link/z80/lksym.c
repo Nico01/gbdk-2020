@@ -53,8 +53,7 @@
  *		(1)	The symbol hash tables are cleared
  */
 
-VOID
-syminit()
+void syminit(void)
 {
 	struct sym **spp;
 
@@ -120,10 +119,9 @@ syminit()
  *   `------------ sp->s_id
  *
  */
-struct sym *
-newsym()
+struct sym *newsym(void)
 {
-	register int c, i, nglob;
+	int c, i, nglob;
 	struct sym *tsp;
 	struct sym **s;
 	char id[NCPS];
@@ -177,7 +175,7 @@ newsym()
 	lkexit(1);
 
 	/* Never reached */
-        return 0;
+        return NULL;
 }
 
 /*)Function	sym *	lkpsym(id,f)
@@ -211,12 +209,10 @@ newsym()
  *		for the new sym structure the linker terminates.
  */
 
-struct sym *
-lkpsym(id, f)
-char *id;
+struct sym *lkpsym(char *id, int f)
 {
-	register struct sym *sp;
-	register int h;
+	struct sym *sp;
+	int h;
 
 	h = hash(id);
 	sp = symhash[h];
@@ -255,11 +251,9 @@ char *id;
  *		none
  */
 
-Addr_T
-symval(tsp)
-register struct sym *tsp;
+Addr_T symval(struct sym *tsp)
 {
-	register Addr_T val;
+	Addr_T val;
 
 	val = tsp->s_addr;
 	if (tsp->s_axp) {
@@ -295,12 +289,10 @@ register struct sym *tsp;
  *		Undefined variables have their areas set to "_CODE".
  */
 
-VOID
-symdef(fp)
-FILE *fp;
+void symdef(FILE *fp)
 {
-	register struct sym *sp;
-	register int i;
+	struct sym *sp;
+	int i;
 
 	for (i=0; i<NHASH; ++i) {
 		sp = symhash[i];
@@ -344,12 +336,9 @@ FILE *fp;
  *		Error output generated.
  */
 
-VOID
-symmod(fp, tsp)
-FILE *fp;
-struct sym *tsp;
+void symmod(FILE *fp, struct sym *tsp)
 {
-    register int i;
+    int i;
 	struct sym **p;
 
 	if ((hp = headp) != NULL) {
@@ -390,11 +379,9 @@ struct sym *tsp;
  *
  */
 
-int
-symeq(p1, p2)
-register char *p1, *p2;
+int symeq(char *p1, char *p2)
 {
-	register int n;
+	int n;
 
 	n = NCPS;
 	do {
@@ -434,9 +421,7 @@ register char *p1, *p2;
  *
  */
  
-int
-hash(p)
-register char *p;
+int hash(char *p)
 {
 	register int h, n;
 
@@ -478,14 +463,12 @@ register char *p;
  *		the linker is terminated.
  */
 
-VOID *
-new(n)
-unsigned int n;
+char *new(unsigned int n)
 {
-	register char *p,*q;
-	register unsigned int i;
+	char *p,*q;
+	unsigned int i;
 
-	if ((p = (char *) malloc(n)) == NULL) {
+	if ((p = malloc(n)) == NULL) {
 		fprintf(stderr, "Out of space!\n");
 		lkexit(1);
 	}

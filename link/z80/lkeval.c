@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <alloc.h>
 #include "aslink.h"
 
 /*)Module	lkeval.c
@@ -59,11 +58,10 @@
  *		numerical value.
  */
 
-Addr_T
-eval()
+Addr_T eval(void)
 {
-	register int c, v;
-	register Addr_T n;
+	int c, v;
+	Addr_T n;
 
 	c = getnb();
 	n = 0;
@@ -111,11 +109,10 @@ eval()
  *		text string.
  */
 
-Addr_T
-expr (n)
+Addr_T expr (int n)
 {
-	register int c, p;
-	register Addr_T v, ve;
+	int c, p;
+	Addr_T v, ve;
 
 	v = term();
 	while (ctype[c = getnb()] & BINOP) {
@@ -208,11 +205,10 @@ expr (n)
  *		An arithmetic term is evaluated by scanning input text.
  */
 
-Addr_T
-term()
+Addr_T term(void)
 {
-	register int c, r, n;
-	register Addr_T v;
+	int c, r, n;
+	Addr_T v;
 	struct sym *sp;
 	char id[NCPS];
 
@@ -330,9 +326,7 @@ term()
  *		none
  */
 
-int
-digit(c, r)
-register int c, r;
+int digit(int c, int r)
 {
 	if (r == 16) {
 		if (ctype[c] & RAD16) {
@@ -378,9 +372,7 @@ register int c, r;
  *		none
  */
  
-int
-oprio(c)
-register int c;
+int oprio(int c)
 {
 	if (c == '*' || c == '/' || c == '%')
 		return (10);

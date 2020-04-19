@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//#include <alloc.h>
 #include <ctype.h>
 #include "aslink.h"
 
@@ -73,9 +72,7 @@
  *
  */
 
-VOID
-reloc(c)
-char c;
+void reloc(char c)
 {
 	switch(c) {
 
@@ -147,8 +144,7 @@ char c;
  *
  */
 
-VOID
-relt()
+void relt(void)
 {
 	rtcnt = 0;
 	while (more()) {
@@ -247,11 +243,10 @@ relt()
  *
  */
 
-VOID
-relr()
+void relr(void)
 {
-	register int mode;
-	register Addr_T reli, relv;
+	int mode;
+	Addr_T reli, relv;
 	int aindex, rindex, rtp, error;
 	Addr_T r, rtbase, rtofst, paga = 0, pags = 0, pc;
 	struct areax **a;
@@ -506,10 +501,9 @@ char *errmsg[] = {
  *
  */
 
-VOID
-relp()
+void relp(void)
 {
-	register int aindex, rindex;
+	int aindex, rindex;
 	int mode, rtp;
 	Addr_T relv;
 	struct areax **a;
@@ -606,8 +600,7 @@ relp()
  *
  */
 
-VOID
-rele()
+void rele(void)
 {
 	if (uflag != 0) {
 		lkulist(0);
@@ -650,10 +643,9 @@ rele()
  *
  */
 
-Addr_T
-evword()
+Addr_T evword(void)
 {
-	register Addr_T v;
+	Addr_T v;
 
 	if (hilo) {
 		v =  (eval() << 8);
@@ -688,12 +680,9 @@ evword()
  *
  */
 
-Addr_T
-adb_b(v, i)
-register Addr_T v;
-register int i;
+Addr_T adb_b(Addr_T v, int i)
 {
-	return(rtval[i] += v);
+	return (rtval[i] += v);
 }
 
 /*)Function	Addr_T 	adb_lo(v, i)
@@ -723,12 +712,9 @@ register int i;
  *
  */
 
-Addr_T
-adb_lo(v, i)
-Addr_T	v;
-int	i;
+Addr_T adb_lo(Addr_T v, int i)
 {
-	register Addr_T j;
+	Addr_T j;
 
 	j = adw_w(v, i);
 	/*
@@ -769,10 +755,7 @@ int	i;
  *
  */
 
-Addr_T
-adb_hi(v, i)
-Addr_T	v;
-int	i;
+Addr_T adb_hi(Addr_T v, int i)
 {
 	register Addr_T j;
 
@@ -811,12 +794,9 @@ int	i;
  *
  */
 
-Addr_T
-adw_w(v, i)
-register Addr_T v;
-register int i;
+Addr_T adw_w(Addr_T v, int i)
 {
-	register Addr_T j;
+	Addr_T j;
 
 	if (hilo) {
 		j = v + (rtval[i] << 8) + (rtval[i+1] & 0xff);
@@ -856,12 +836,9 @@ register int i;
  *
  */
 
-Addr_T
-adw_lo(v, i)
-Addr_T	v;
-int	i;
+Addr_T adw_lo(Addr_T v, int i)
 {
-	register Addr_T j;
+	Addr_T j;
 
 	j = adw_w(v, i);
 	/*
@@ -902,12 +879,9 @@ int	i;
  *
  */
 
-Addr_T
-adw_hi(v, i)
-Addr_T	v;
-int	i;
+Addr_T adw_hi(Addr_T v, int i)
 {
-	register Addr_T j;
+	Addr_T j;
 
 	j = adw_w(v, i);
 	/*
@@ -944,9 +918,7 @@ int	i;
  *
  */
 
-VOID
-relerr(str)
-char *str;
+void relerr(char *str)
 {
 	errdmp(stderr, str);
 	if (mfp)
@@ -984,10 +956,7 @@ char *str;
  *
  */
 
-VOID
-errdmp(fptr, str)
-FILE *fptr;
-char *str;
+void errdmp(FILE *fptr, char *str)
 {
 	int mode, aindex, rindex;
 	struct sym **s;
@@ -1072,10 +1041,7 @@ char *str;
  *
  */
 
-VOID
-prntval(fptr, v)
-FILE *fptr;
-Addr_T v;
+void prntval(FILE *fptr, Addr_T v)
 {
 	if (xflag == 0) {
 		fprintf(fptr, "%04X\n", v);
@@ -1109,9 +1075,7 @@ Addr_T v;
  *
  */
 
-VOID
-relerp(str)
-char *str;
+void relerp(char *str)
 {
 	erpdmp(stderr, str);
 	if (mfp)
@@ -1142,12 +1106,9 @@ char *str;
  *
  */
 
-VOID
-erpdmp(fptr, str)
-FILE *fptr;
-char *str;
+void erpdmp(FILE *fptr, char *str)
 {
-	register struct head *thp;
+	struct head *thp;
 
 	thp = sdp.s_areax->a_bhp;
 
