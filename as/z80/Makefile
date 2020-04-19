@@ -6,13 +6,10 @@ OBJDIR	= obj/$(EXT)
 
 SDC	= .
 
-SLIBSRC	= NewAlloc.c
-
 SRC	= asdata.c asexpr.c aslex.c aslist.c asmain.c asout.c \
 	  assubr.c assym.c z80adr.c z80ext.c z80mch.c z80pst.c
 
 OBJS	= $(SRC:%.c=$(OBJDIR)/%.o)
-SLIBOBJS	= $(SLIBSRC:%.c=$(OBJDIR)/%.o) 
 
 BINS	= $(BUILDDIR)as$(EXT)
 
@@ -37,8 +34,8 @@ $(OBJDIR):
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
-$(BINS): $(OBJS) $(SLIBOBJS)
-	$(CC) -o $(BINS) $(OBJS) $(SLIBOBJS) $(LDFLAGS)
+$(BINS): $(OBJS)
+	$(CC) -o $(BINS) $(OBJS) $(LDFLAGS)
 
 
 $(OBJDIR)/%.o:	%.c

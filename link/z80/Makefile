@@ -4,14 +4,11 @@ include $(PRJDIR)/Makefile.common
 
 OBJDIR	= obj/$(EXT)
 
-SLIBSRC	= NewAlloc.c
-
 SRC	= lkarea.c lkdata.c lkeval.c lkhead.c lkihx.c lklex.c \
 	  lklibr.c lklist.c lkmain.c lkrloc.c lks19.c lksym.c \
 	  lkgb.c lkgg.c
 
 OBJS	= $(SRC:%.c=$(OBJDIR)/%.o) 
-SLIBOBJS	= $(SLIBSRC:%.c=$(OBJDIR)/%.o) 
 
 BINS	= $(BUILDDIR)link$(EXT)
 
@@ -23,8 +20,8 @@ LDFLAGS += -lm $(EXTRALIBS)
 
 all:	$(BINS)
 
-$(BINS): $(OBJDIR) $(BUILDDIR) $(OBJS) $(SLIBOBJS)
-	$(CC) -g -o $(BINS) $(OBJS) $(SLIBOBJS) $(LDFLAGS)
+$(BINS): $(OBJDIR) $(BUILDDIR) $(OBJS)
+	$(CC) -g -o $(BINS) $(OBJS) $(LDFLAGS)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
