@@ -180,12 +180,12 @@ extern	struct	adsym	CND[];
 	/* z80adr.c */
 extern	int		addr();
 extern	int		admode();
-extern	int		any();
+extern	int any(char c, char *str);
 extern	int		srch();
 
 	/* z80mch.c */
 extern	int		comma();
 extern	int		genop();
 extern	int		gixiy();
-extern	VOID		minit();
-extern	VOID		machine(struct mne *mp) ;
+extern	VOID	minit();
+extern	VOID	machine(struct mne *mp) ;

@@ -56,11 +56,9 @@
  *		error code array eb[] or the parse terminated.
  */
 
-VOID
-err(c)
-register int c;
+void err(int c)
 {
-	register char *p;
+	char *p;
 
 #ifndef SDK
 	aserr++;
@@ -104,10 +102,9 @@ register int c;
  *		none
  */
 
-VOID
-diag()
+void diag(void)
 {
-	register char *p,*errstr;
+	char *p, *errstr;
 
 	if (eb != ep) {
 		p = eb;
@@ -175,8 +172,7 @@ diag()
 /*
  * Note an 'r' error.
  */
-VOID
-rerr()
+void rerr(void)
 {
 	err('r');
 }
@@ -184,8 +180,7 @@ rerr()
 /*
  * Note an 'a' error.
  */
-VOID
-aerr()
+void aerr(void)
 {
 	err('a');
 }
@@ -193,8 +188,7 @@ aerr()
 /*
  * Note a 'q' error.
  */
-VOID
-qerr()
+void qerr(void)
 {
 	err('q');
 }
@@ -202,7 +196,7 @@ qerr()
 /*
  * ASxxxx assembler errors
  */
-char *errors[] = {
+const char *errors[] = {
 	"<.> use \". = . + <arg>\" not \". = <arg>\"",
 	"<a> machine specific addressing or addressing mode error",
 	"<b> direct page boundary error",
@@ -238,17 +232,13 @@ char *errors[] = {
  *		A pointer to the appropriate
  *		error code string is returned.
  */
-char *
-geterr(c)
-int c;
+const char *geterr(int c)
 {
-	int	i;
-
-	for (i=0; errors[i]!=NULL; i++) {
+	for (int i = 0; errors[i] != NULL; i++) {
 		if (c == errors[i][1]) {
-			return(errors[i]);
+			return errors[i];
 		}
 	}
-	return(NULL);
+	return NULL;
 }
 

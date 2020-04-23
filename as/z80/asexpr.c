@@ -79,12 +79,9 @@
  *		terminate if a 'q' error occurs.
  */
 
-VOID
-expr(esp, n)
-register struct expr *esp;
-int n;
+void expr(struct expr *esp, int n)
 {
-        register int c, p;
+        int c, p;
         struct area *ap;
         struct expr re;
 
@@ -208,15 +205,14 @@ int n;
  *		a 'r' error is reported.
  */
 
-Addr_T
-absexpr()
+Addr_T absexpr(void)
 {
-        struct expr e;
+    struct expr e;
 
 	clrexpr(&e);
 	expr(&e, 0);
 	abscheck(&e);
-	return (e.e_addr);
+	return e.e_addr;
 }
 
 /*)Function	VOID	term(esp)
@@ -264,12 +260,10 @@ absexpr()
  *		by a 'q' error.
  */
 
-VOID
-term(esp)
-register struct expr *esp;
+void term(struct expr *esp)
 {
-        register int c, n;
-        register char *jp;
+        int c, n;
+        char *jp;
         char id[NCPS];
         struct sym  *sp;
         struct tsym *tp;
@@ -496,9 +490,7 @@ register struct expr *esp;
  *		none
  */
 
-int
-digit(c, r)
-register int c, r;
+int digit(int c, int r)
 {
         if (r == 16) {
                 if (ctype[c] & RAD16) {
@@ -551,9 +543,7 @@ register int c, r;
  *		'r' error invoked.
  */
 
-VOID
-abscheck(esp)
-register struct expr *esp;
+void abscheck(struct expr *esp)
 {
         if (esp->e_flag || esp->e_base.e_ap) {
                 esp->e_flag = 0;
@@ -587,14 +577,12 @@ register struct expr *esp;
  *		none
  */
 
-int
-is_abs (esp)
-register struct expr *esp;
+int is_abs(struct expr *esp)
 {
-        if (esp->e_flag || esp->e_base.e_ap) {
-		return(0);
-        }
-	return(1);
+    if (esp->e_flag || esp->e_base.e_ap)
+        return 0;
+
+	return 1;
 }
 
 /*)Function	int	oprio(c)
@@ -617,9 +605,7 @@ register struct expr *esp;
  *		none
  */
  
-int
-oprio(c)
-register int c;
+int oprio(int c)
 {
         if (c == '*' || c == '/' || c == '%')
                 return (10);
@@ -655,9 +641,7 @@ register int c;
  *		expression structure cleared.
  */
  
-VOID
-clrexpr(esp)
-register struct expr *esp;
+void clrexpr(struct expr *esp)
 {
 	esp->e_mode = 0;
 	esp->e_flag = 0;

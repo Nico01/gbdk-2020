@@ -79,12 +79,11 @@
  */
 
 #ifndef MLH_LST
-VOID
-list()
+void list(void)
 {
-	register char *wp;
-	register int *wpt;
-	register int nb;
+	char *wp;
+	int *wpt;
+	int nb;
 
 	if (lfp == NULL || lmode == NLIST)
 		return;
@@ -270,12 +269,11 @@ list()
 	}
 }
 #else
-VOID
-list()
+void list(void)
 {
-	register char *wp;
-	register int *wpt;
-	register nb;
+	char *wp;
+	int *wpt;
+	int nb;
 
 	if (lfp == NULL || lmode == NLIST)
 		return;
@@ -355,12 +353,9 @@ list()
  *		Data formatted and output to listing.
  */
 
-VOID
-list1(wp, wpt, nb, f)
-register char *wp;
-register int *wpt, nb, f;
+void list1(char *wp, int *wpt, int nb, int f)
 {
-	register int i;
+	int i;
 
 	/*
 	 * HEX output Option.
@@ -469,13 +464,9 @@ register int *wpt, nb, f;
  *		Relocation flag output to listing file.
  */
 
-VOID
-list2(t)
-register int t;
+void list2(int t)
 {
-	register int c;
-
-	c = ' ';
+	int c = ' ';
 
 	/*
 	 * Designate a relocatable word by `.
@@ -543,14 +534,10 @@ register int t;
  *		a new page header is output to the listing file.
  */
 
-VOID
-slew(fp,flag)
-FILE *fp;
-int flag;
+void slew(FILE *fp, int flag)
 {
 	if ((lop++ >= NLPP) && flag) {
-		fprintf(fp, "\fASxxxx Assembler %s  (%s), page %u.\n",
-			VERSION, cpu, ++page);
+		fprintf(fp, "\fASxxxx Assembler %s  (%s), page %u.\n", VERSION, cpu, ++page);
 		fprintf(fp, "%s\n", tb);
 		fprintf(fp, "%s\n\n", stb);
 		lop = 5;
@@ -599,12 +586,10 @@ int flag;
  *		Symbol and area tables output.
  */
 
-VOID
-lstsym(fp)
-FILE *fp;
+void lstsym(FILE *fp)
 {
-	register int c, i, j, k;
-	register char *ptr;
+	int c, i, j, k;
+	char *ptr;
 	int nmsym, narea;
 	struct sym *sp;
 	struct sym **p;

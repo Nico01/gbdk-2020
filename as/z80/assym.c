@@ -78,14 +78,13 @@
  *		(3)	The area pointer is initialized to dca (area[0]).
  */
 
-VOID
-syminit()
+void syminit(void)
 {
-	register struct mne  *mp;
+	struct mne  *mp;
 	struct mne **mpp;
-	register struct sym  *sp;
+	struct sym  *sp;
 	struct sym **spp;
-	register int h;
+	int h;
 
 	mpp = &mnehash[0];
 	while (mpp < &mnehash[NHASH])
@@ -137,20 +136,17 @@ syminit()
  *		none
  */
 
-struct area *
-alookup(id)
-char *id;
+struct area *alookup(char *id)
 {
-	register struct area *ap;
+	struct area *ap = areap;
 
-	ap = areap;
 	while (ap) {
 		if (symeq(id, ap->a_id)) {
-			return (ap);
+			return ap;
 		}
 		ap = ap->a_ap;
 	}
-	return(NULL);
+	return NULL;
 }
 
 /*)Function	mne *	mlookup(id)
@@ -176,21 +172,17 @@ char *id;
  *		none
  */
 
-struct mne *
-mlookup(id)
-char *id;
+struct mne *mlookup(char *id)
 {
-	register struct mne *mp;
-	register int h;
+	int h = hash(id);
+	struct mne *mp = mnehash[h];
 
-	h = hash(id);
-	mp = mnehash[h];
 	while (mp) {
 		if (symeq(id, mp->m_id))
-			return (mp);
+			return mp;
 		mp = mp->m_mp;
 	}
-	return (NULL);
+	return NULL;
 }
 
 /*)Function	sym *	lookup(id)
@@ -221,20 +213,17 @@ char *id;
  *		for the new sym structure the assembly terminates.
  */
 
-struct sym *
-lookup(id)
-char *id;
+struct sym *lookup(char *id)
 {
-	register struct sym *sp;
-	register int h;
+	int h = hash(id);
+	struct sym *sp = symhash[h];
 
-	h = hash(id);
-	sp = symhash[h];
 	while (sp) {
 		if (symeq(id, sp->s_id))
 			return (sp);
 		sp = sp->s_sp;
 	}
+
 	sp = (struct sym *) new (sizeof(struct sym));
 	sp->s_sp = symhash[h];
 	symhash[h] = sp;
@@ -269,13 +258,11 @@ char *id;
  *		Symbol types changed.
  */
 
-VOID
-symglob()
+void symglob(void)
 {
-	register struct sym *sp;
-	register int i;
+	struct sym *sp;
 
-	for (i=0; i<NHASH; ++i) {
+	for (int i=0; i<NHASH; ++i) {
 		sp = symhash[i];
 		while (sp != NULL) {
 			if (sp->s_type == S_NEW)
@@ -306,13 +293,11 @@ symglob()
  *		Symbol types changed.
  */
 
-VOID
-allglob()
+void allglob(void)
 {
-	register struct sym *sp;
-	register int i;
+	struct sym *sp;
 
-	for (i=0; i<NHASH; ++i) {
+	for (int i=0; i<NHASH; ++i) {
 		sp = symhash[i];
 		while (sp != NULL) {
 			if (sp != &dot && sp->s_type == S_USER)
@@ -345,25 +330,22 @@ allglob()
  *
  */
 
-int
-symeq(p1, p2)
-register char *p1, *p2;
+int symeq(char *p1, char *p2)
 {
-	register int n;
-
-	n = NCPS;
+	int n = NCPS;
 	do {
 
 #if	CASE_SENSITIVE
 		if (*p1++ != *p2++)
-			return (0);
+			return 0;
 #else
 		if (ccase[(unsigned char)(*p1++)] != ccase[(unsigned char)(*p2++)])
-			return (0);
+			return 0;
 #endif
 
 	} while (--n);
-	return (1);
+
+	return 1;
 }
 
 /*)Function	int	hash(p)
@@ -388,14 +370,10 @@ register char *p1, *p2;
  *		none
  */
  
-int
-hash(p)
-register char *p;
+int hash(char *p)
 {
-	register int h, n;
-
-	h = 0;
-	n = NCPS;
+	int h = 0;
+	int n = NCPS;
 	do {
 
 #if	CASE_SENSITIVE
@@ -405,6 +383,7 @@ register char *p;
 #endif
 
 	} while (--n);
+
 	return (h&HMASK);
 }
 
@@ -432,15 +411,14 @@ register char *p;
  *		the assembly is terminated.
  */
 
-VOID *
-new(n)
-unsigned int n;
+char *new(unsigned int n)
 {
-	register VOID *p;
+	char *p = malloc(n);
 
-	if ((p = (VOID *) malloc(n)) == NULL) {
+	if (p == NULL) {
 		fprintf(stderr, "Out of space!\n");
 		asexit(1);
 	}
-	return (p);
+
+	return p;
 }

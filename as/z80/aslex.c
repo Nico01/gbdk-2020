@@ -82,12 +82,9 @@
  *		assembler-source text line.
  */
 
-VOID
-getid(id, c)
-register int c;
-char *id;
+void getid(char *id, int c)
 {
-	register char *p;
+	char *p;
 
 	if (c < 0) {
 		c = getnb();
@@ -148,10 +145,7 @@ char *id;
  *		assembler-source text line.
  */
 
-VOID
-getst(id, c)
-register int c;
-char *id;
+void getst(char *id, int c)
 {
 	register char *p;
 
@@ -190,14 +184,13 @@ char *id;
  *		in the current assembler-source text line
  */
 
-char
-getnb()
+char getnb(void)
 {
-	register int c;
+	int c;
 
 	while ((c=get()) == ' ' || c == '\t')
 		;
-	return (c);
+	return c;
 }
 
 /*)Function	char	get()
@@ -223,14 +216,14 @@ getnb()
  *		line, ip is not updated.
  */
 
-char
-get()
+char get()
 {
-	register int c;
+	int c;
 
 	if ((c = *ip) != 0)
 		++ip;
-	return (c);
+
+	return c;
 }
 
 /*)Function	VOID	unget(c)
@@ -261,8 +254,7 @@ get()
  *		ip decremented by 1 character position
  */
 
-VOID
-unget(c)
+void unget(int c)
 {
 	if (c)
 		if (ip != ib)
@@ -299,10 +291,9 @@ unget(c)
  *		in the current assembler-source text line
  */
 
-int
-getmap(d)
+int getmap(int d)
 {
-	register int c, n, v;
+	int c, n, v;
 
 	if ((c=get()) == '\0')
 		qerr();
@@ -351,7 +342,7 @@ getmap(d)
 			break;
 		}
 	}
-	return (c);
+	return c;
 }
 
 /*)Function	int	getLine_()
@@ -400,10 +391,9 @@ getmap(d)
  *		will be updated.
  */
 
-int
-getLine_()
+int getLine_(void)
 {
-register int i;
+    int i;
 
 loop:	if (incfil >= 0) {
 		if (fgets(ib, sizeof ib, ifp[incfil]) == NULL) {
@@ -460,14 +450,11 @@ loop:	if (incfil >= 0) {
  *		the position in the current assembler-source text line
  */
 
-int
-more()
+int more(void)
 {
-	register int c;
-
-	c = getnb();
+	int c = getnb();
 	unget(c);
-	return( (c == '\0' || c == ';') ? 0 : 1 );
+	return ((c == '\0' || c == ';') ? 0 : 1);
 }
 
 /*)Function	char	endline()
@@ -492,11 +479,9 @@ more()
  *		position in the current assembler-source text line
  */
 
-char
-endline()
+char endline(void)
 {
-	register int c;
+	int c = getnb();
 
-	c = getnb();
-	return( (c == '\0' || c == ';') ? 0 : c );
+	return ((c == '\0' || c == ';') ? 0 : c);
 }

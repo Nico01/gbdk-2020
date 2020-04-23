@@ -533,7 +533,7 @@ extern	struct	area *	alookup();
 extern	struct	mne *	mlookup();
 extern	int		hash();
 extern	struct	sym *	lookup();
-extern	VOID *		new();
+extern	char *new(unsigned int n);
 extern	int		symeq();
 extern	VOID		syminit();
 extern	VOID		symglob();
@@ -543,7 +543,7 @@ extern	VOID		allglob();
 extern	VOID		aerr();
 extern	VOID		diag();
 extern	VOID		err();
-extern	char *		geterr();
+extern	const char *geterr(int c);
 extern	VOID		qerr();
 extern	VOID		rerr();
 

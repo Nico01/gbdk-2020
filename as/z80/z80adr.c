@@ -33,11 +33,10 @@
  *	[label]		S_INDM		----		s_addr		s_area
  *	offset[REG]	S_IND+icode	----		offset		----
  */
-int
-addr(esp)
-register struct expr *esp;
+
+int addr(struct expr *esp)
 {
-	register int c, mode = 0, indx;
+	int c, mode = 0, indx;
 
 	if ((c = getnb()) == '#') {
 		expr(esp, 0);
@@ -114,18 +113,15 @@ register struct expr *esp;
  * for a match. Return the addressing value on a match or
  * zero for no match.
  */
-int
-admode(sp)
-register struct adsym *sp;
+int admode(struct adsym *sp)
 {
-	register char *ptr;
-	register int i;
-	register char *ips;
+	char *ptr;
 
-	ips = ip;
+	char *ips = ip;
 	unget(getnb());
 
-	i = 0;
+	int i = 0;
+
 	while ( *(ptr = (char *) &sp[i]) ) {
 		if (srch(ptr)) {
 			return(sp[i].a_val);
@@ -133,18 +129,17 @@ register struct adsym *sp;
 		i++;
 	}
 	ip = ips;
-	return(0);
+
+	return 0;
 }
 
 /*
  *      srch --- does string match ?
  */
-int
-srch(str)
-register char *str;
+
+int srch(char *str)
 {
-	register char *ptr;
-	ptr = ip;
+	char *ptr = ip;
 
 #if	CASE_SENSITIVE
 	while (*ptr && *str) {
@@ -175,20 +170,21 @@ register char *str;
 			ip = ptr;
 			return(1);
 		}
-	return(0);
+
+	return 0;
 }
 
 /*
  *      any --- does str contain c?
  */
-int
-any(c,str)
-char    c, *str;
+
+int any(char c, char *str)
 {
 	while (*str)
 		if(*str++ == c)
-			return(1);
-	return(0);
+			return 1;
+
+	return 0;
 }
 
 /*

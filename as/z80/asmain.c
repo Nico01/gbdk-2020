@@ -153,11 +153,10 @@
  *		REL, LST, and/or SYM files may be generated.
  */
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-	register char *p;
-	register int c, i;
+	char *p;
+	int c, i;
 	struct area *ap;
 
 #ifdef SDK
@@ -350,9 +349,7 @@ main(int argc, char **argv)
  *		All files closed. Program terminates.
  */
 
-VOID
-asexit(i)
-int i;
+void asexit(int i)
 {
 	int j;
 
@@ -460,13 +457,12 @@ int i;
  *		VOID	unget()		aslex.c
  */
 
-VOID
-asmbl()
+void asmbl()
 {
-	register struct mne *mp;
-	register struct sym *sp;
-	register struct tsym *tp;
-	register int c;
+	struct mne *mp;
+	struct sym *sp;
+	struct tsym *tp;
+	int c;
 	struct area  *ap;
 	struct expr e1;
 	char id[NCPS];
@@ -1018,14 +1014,10 @@ loop:
  *		File is opened for read or write.
  */
 
-FILE *
-afile(fn, ft, wf)
-char *fn;
-char *ft;
-int wf;
+FILE *afile(char *fn, char *ft, int wf)
 {
-	register char *p2, *p3;
-	register int c;
+	char *p2, *p3;
+	int c;
 	FILE *fp;
 
 	p2 = afn;
@@ -1089,11 +1081,9 @@ int wf;
  *		Current area saved, new area loaded, buffers flushed.
  */
 
-VOID
-newdot(nap)
-register struct area *nap;
+void newdot(struct area *nap)
 {
-	register struct area *oap;
+	struct area *oap;
 
 	oap = dot.s_area;
 	oap->a_fuzz = fuzz;
@@ -1128,16 +1118,13 @@ register struct area *nap;
  *		has changed.
  */
 
-VOID
-phase(ap, a)
-struct area *ap;
-Addr_T a;
+void phase(struct area *ap, Addr_T a)
 {
 	if (ap != dot.s_area || a != dot.s_addr)
 		err('p');
 }
 
-char *usetxt[] = {
+const char *usetxt[] = {
 #ifdef SDK
 	"Usage: [-dqxgalopsf] outfile file1 [file2 file3 ...]",
 #else /* SDK */
@@ -1185,10 +1172,9 @@ char *usetxt[] = {
  *		program is terminated
  */
 
-VOID
-usage()
+void usage(void)
 {
-	register char   **dp;
+	char **dp;
 
 	fprintf(stderr, "\nASxxxx Assembler %s  (%s)\n\n", VERSION, cpu);
 	for (dp = usetxt; *dp; dp++)

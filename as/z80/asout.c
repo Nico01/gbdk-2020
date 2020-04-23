@@ -226,8 +226,7 @@ char	*relp = { &rel[0] };
  *		The current assembly address is incremented by 1.
  */
 
-VOID
-outab(b)
+void outab(int b)
 {
 	if (pass == 2) {
 		out_lb(b,0);
@@ -261,8 +260,7 @@ outab(b)
  *		The current assembly address is incremented by 2.
  */
 
-VOID
-outaw(w)
+void outaw(int w)
 {
 	if (pass == 2) {
 		out_lw(w,0);
@@ -306,12 +304,9 @@ outaw(w)
  *		The current assembly address is incremented by 1.
  */
 
-VOID
-outrb(esp, r)
-register struct expr *esp;
-int r;
+void outrb(struct expr *esp, int r)
 {
-	register int n;
+	int n;
 
 	if (pass == 2) {
 		if (esp->e_flag==0 && esp->e_base.e_ap==NULL) {
@@ -377,12 +372,9 @@ int r;
  *		The current assembly address is incremented by 2.
  */
 
-VOID
-outrw(esp, r)
-register struct expr *esp;
-int r;
+void outrw(struct expr *esp, int r)
 {
-	register int n;
+	int n;
 
 	if (pass == 2) {
 		if (esp->e_flag==0 && esp->e_base.e_ap==NULL) {
@@ -450,12 +442,9 @@ int r;
  *		Paging information dumped to .REL file.
  */
 
-VOID
-outdp(carea, esp)
-register struct area *carea;
-register struct expr *esp;
+void outdp(struct area *carea, struct expr *esp)
 {
-	register int n, r;
+	int n, r;
 
 	if (oflag && pass==2) {
 		outchk(HUGE,HUGE);
@@ -497,10 +486,9 @@ register struct expr *esp;
  *		assembled data and relocation buffers will be cleared.
  */
 
-VOID
-outall()
+void outall(void)
 {
-	if (oflag && pass==2)
+	if (oflag && pass == 2)
 		outbuf("R");
 }
 
@@ -525,10 +513,9 @@ outall()
  *		assembled data and relocation buffers will be cleared.
  */
 
-VOID
-outdot()
+void outdot(void)
 {
-	if (oflag && pass==2) {
+	if (oflag && pass == 2) {
 		fprintf(ofp, "T");
 		out(txt,(int) (txtp-txt));
 		fprintf(ofp, "\n");
@@ -565,14 +552,14 @@ outdot()
  *		Data and relocation buffers may be emptied and initialized.
  */
 
-VOID
-outchk(nt, nr)
+void outchk(int nt, int nr)
 {
-	register struct area *ap;
+	struct area *ap;
 
-	if (txtp+nt > &txt[NTXT] || relp+nr > &rel[NREL]) {
+	if (txtp + nt > &txt[NTXT] || relp + nr > &rel[NREL]) {
 		outbuf("R");
 	}
+
 	if (txtp == txt) {
 		out_tw(dot.s_addr);
 		if ((ap = dot.s_area) != NULL) {
@@ -606,15 +593,13 @@ outchk(nt, nr)
  *		buffer pointers and counters initialized.
  */
 
-VOID
-outbuf(s)
-char *s;
+void outbuf(char *s)
 {
 	if (txtp > &txt[2]) {
 		fprintf(ofp, "T");
 		out(txt,(int) (txtp-txt));
 		fprintf(ofp, "\n");
-		fprintf(ofp, s);
+		fprintf(ofp, "%s", s);
 		out(rel,(int) (relp-rel));
 		fprintf(ofp, "\n");
 	}
@@ -664,12 +649,11 @@ char *s;
  *		and area information is output to the .REL file.
  */
 
-VOID
-outgsd()
+void outgsd(void)
 {
-	register struct area *ap;
-	register struct sym  *sp;
-	register int i, j;
+	struct area *ap;
+	struct sym  *sp;
+	int i, j;
 	char *ptr;
 	int c, narea, nglob, rn;
 
@@ -780,12 +764,10 @@ outgsd()
  *		The A line is sent to the .REL file.
  */
 
-VOID
-outarea(ap)
-register struct area *ap;
+void outarea(struct area *ap)
 {
-	register char *ptr;
-	register int c;
+	char *ptr;
+	int c;
 
 	fprintf(ofp, "A ");
 	ptr = &ap->a_id[0];
@@ -828,12 +810,10 @@ register struct area *ap;
  *		The S line is sent to the .REL file.
  */
 
-VOID
-outsym(sp)
-register struct sym *sp;
+void outsym(struct sym *sp)
 {
-	register char *ptr;
-	register int c;
+	char *ptr;
+	int c;
 
 	fprintf(ofp, "S ");
 	ptr = &sp->s_id[0];
@@ -875,10 +855,7 @@ register struct sym *sp;
  *		Data is sent to the .REL file.
  */
 
-VOID
-out(p, n)
-register char *p;
-register int n;
+void out(char *p, int n)
 {
 	while (n--) {
 		if (xflag == 0) {
@@ -916,9 +893,7 @@ register int n;
  *		Pointers to data and relocation buffers incremented by 1.
  */
 
-VOID
-out_lb(b,t)
-register int b,t;
+void out_lb(int b, int t)
 {
 	if (cp < &cb[NCODE]) {
 		*cp++ = b;
@@ -949,9 +924,7 @@ register int b,t;
  *		Pointers to data and relocation buffers incremented by 2.
  */
 
-VOID
-out_lw(n,t)
-register int n,t;
+void out_lw(int n, int t)
 {
 	if (hilo) {
 		out_lb(hibyte(n),t ? t|R_HIGH : 0);
@@ -983,9 +956,7 @@ register int n,t;
  *		Pointer to relocation buffer incremented by 2.
  */
 
-VOID
-out_rw(n)
-register int n;
+void out_rw(int n)
 {
 	if (hilo) {
 		*relp++ = hibyte(n);
@@ -1017,9 +988,7 @@ register int n;
  *		Pointer to relocation buffer incremented by 2.
  */
 
-VOID
-out_tw(n)
-register int n;
+void out_tw(int n)
 {
 	if (hilo) {
 		*txtp++ = hibyte(n);
@@ -1050,8 +1019,7 @@ register int n;
  *		none
  */
 
-int
-lobyte(n)
+int lobyte(int n)
 {
 	return (n&0377);
 }
@@ -1076,8 +1044,7 @@ lobyte(n)
  *		none
  */
 
-int
-hibyte(n)
+int hibyte(int n)
 {
 	return ((n>>8)&0377);
 }
