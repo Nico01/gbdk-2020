@@ -1,4 +1,4 @@
-/* assubr.c */
+// assubr.c
 
 /*
  * (C) Copyright 1989-1995
@@ -9,14 +9,12 @@
  * Kent, Ohio  44240
  */
 
-/*
- * Extensions: P. Felber, M. Hope
- */
+// Extensions: P. Felber, M. Hope
 
-#include <stdio.h>
-#include <setjmp.h>
-#include <string.h>
 #include "asm.h"
+#include <setjmp.h>
+#include <stdio.h>
+#include <string.h>
 
 /*)Module	assubr.c
  *
@@ -58,21 +56,22 @@
 
 void err(int c)
 {
-	char *p;
-
 #ifndef SDK
-	aserr++;
-#endif /* SDK */
-	p = eb;
-	while (p < ep)
-		if (*p++ == c)
-			return;
-	if (p < &eb[NERR]) {
-		*p++ = c;
-		ep = p;
-	}
-	if (c == 'q')
-		longjmp(jump_env, -1);
+    aserr++;
+#endif // SDK
+    char *p = eb;
+
+    while (p < ep)
+        if (*p++ == c)
+            return;
+
+    if (p < &eb[NERR]) {
+        *p++ = c;
+        ep = p;
+    }
+
+    if (c == 'q')
+        longjmp(jump_env, -1);
 }
 
 /*)Function	VOID	diag()
@@ -104,113 +103,91 @@ void err(int c)
 
 void diag(void)
 {
-	char *p, *errstr;
+    char *errstr;
 
-	if (eb != ep) {
-		p = eb;
+    if (eb != ep) {
+        char *p = eb;
 #ifndef SDK
-		fprintf(stderr, "?ASxxxx-Error-<");
-		while (p < ep) {
-			fprintf(stderr, "%c", *p++);
-		}
-		fprintf(stderr, "> in line ");
-		if (incfil >= 0) {
-			fprintf(stderr, "%d", incline[incfil]);
-			fprintf(stderr, " of %s\n", incfn[incfil]);
-		} else {
-			fprintf(stderr, "%d", srcline[cfile]);
-			fprintf(stderr, " of %s\n", srcfn[cfile]);
-		}
-		p = eb;
-#endif /* SDK */
-		while (p < ep) {
-			if ((errstr = geterr(*p++)) != NULL) {
+        fprintf(stderr, "?ASxxxx-Error-<");
+        while (p < ep) {
+            fprintf(stderr, "%c", *p++);
+        }
+        fprintf(stderr, "> in line ");
+        if (incfil >= 0) {
+            fprintf(stderr, "%d", incline[incfil]);
+            fprintf(stderr, " of %s\n", incfn[incfil]);
+        }
+        else {
+            fprintf(stderr, "%d", srcline[cfile]);
+            fprintf(stderr, " of %s\n", srcfn[cfile]);
+        }
+        p = eb;
+#endif // SDK
+        while (p < ep) {
+            if ((errstr = geterr(*p++)) != NULL) {
 #ifdef SDK
-				/* Modified to conform to gcc error standard, M. Hope, 7 Feb 98. */
-				if (incfil >= 0) {
-					fprintf(stderr, "%s:", incfn[incfil]);
-					fprintf(stderr, "%d: Error:", incline[incfil]);
-				}
-				else {
-					fprintf(stderr, "%s:", srcfn[cfile]);
-					fprintf(stderr, "%d: Error:", srcline[cfile]);
-				}
-				fprintf(stderr, " %s\n", errstr);
+                // Modified to conform to gcc error standard, M. Hope, 7 Feb 98.
+                if (incfil >= 0) {
+                    fprintf(stderr, "%s:", incfn[incfil]);
+                    fprintf(stderr, "%d: Error:", incline[incfil]);
+                }
+                else {
+                    fprintf(stderr, "%s:", srcfn[cfile]);
+                    fprintf(stderr, "%d: Error:", srcline[cfile]);
+                }
+                fprintf(stderr, " %s\n", errstr);
 #else
-				fprintf(stderr, "              %s\n", errstr);
-#endif /* SDK */
-			}
-		}
+                fprintf(stderr, "              %s\n", errstr);
+#endif // SDK
+            }
+        }
 #ifdef SDK
-		aserr++;
-#endif /* SDK */
-	}
+        aserr++;
+#endif // SDK
+    }
 }
 
-/*)Functions:	VOID	aerr()
- *		VOID	qerr()
- *		VOID	rerr()
+/*) Functions:
+ *      void aerr()
+ *		void qerr()
+ *		void rerr()
  *
- *	The functions aerr(), qerr(), and rerr() report their
- *	respective error type.  These are included only for
- *	convenience.
- *
- *	local variables:
- *		none
- *
- *	global variables:
- *		none
+ *	The functions aerr(), qerr(), and rerr() report their respective error type.
+ *	These are included only for convenience.
  *
  *	functions called:
- *		VOID	err()		assubr.c
+ *		void err()		assubr.c
  *
  *	side effects:
  *		The appropriate error code is inserted into the
  *		error array and the parse may be terminated.
  */
 
-/*
- * Note an 'r' error.
- */
-void rerr(void)
-{
-	err('r');
-}
+// Note an 'r' error.
+void rerr(void) { err('r'); }
 
-/*
- * Note an 'a' error.
- */
-void aerr(void)
-{
-	err('a');
-}
+// Note an 'a' error.
+void aerr(void) { err('a'); }
 
-/*
- * Note a 'q' error.
- */
-void qerr(void)
-{
-	err('q');
-}
+// Note a 'q' error.
+void qerr(void) { err('q'); }
 
-/*
- * ASxxxx assembler errors
- */
+// ASxxxx assembler errors
 const char *errors[] = {
-	"<.> use \". = . + <arg>\" not \". = <arg>\"",
-	"<a> machine specific addressing or addressing mode error",
-	"<b> direct page boundary error",
-	"<d> direct page addressing error",
-	"<i> .include file error or an .if/.endif mismatch",
-	"<m> multiple definitions error",
-	"<o> .org in REL area or directive / mnemonic error",
-	"<p> phase error: label location changing between passes 2 and 3",
-	"<q> missing or improper operators, terminators, or delimiters",
-	"<r> relocation error",
-	"<u> undefined symbol encountered during assembly",
-	NULL
+    "<.> use \". = . + <arg>\" not \". = <arg>\"",
+    "<a> machine specific addressing or addressing mode error",
+    "<b> direct page boundary error",
+    "<d> direct page addressing error",
+    "<i> .include file error or an .if/.endif mismatch",
+    "<m> multiple definitions error",
+    "<o> .org in REL area or directive / mnemonic error",
+    "<p> phase error: label location changing between passes 2 and 3",
+    "<q> missing or improper operators, terminators, or delimiters",
+    "<r> relocation error",
+    "<u> undefined symbol encountered during assembly",
+    NULL
 };
-	
+
 /*)Function:	char	*getarr(c)
  *
  *		int	c		the error code character
@@ -234,11 +211,11 @@ const char *errors[] = {
  */
 const char *geterr(int c)
 {
-	for (int i = 0; errors[i] != NULL; i++) {
-		if (c == errors[i][1]) {
-			return errors[i];
-		}
-	}
-	return NULL;
-}
+    for (int i = 0; errors[i] != NULL; i++) {
+        if (c == errors[i][1]) {
+            return errors[i];
+        }
+    }
 
+    return NULL;
+}

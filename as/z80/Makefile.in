@@ -32,7 +32,7 @@ M_OR_MM		= @M_OR_MM@
 LDFLAGS		= @LDFLAGS@ -lm
 
 ASOBJECTS	= asdata.o asexpr.o aslex.o aslist.o asmain.o asout.o \
-		  assubr.o assym.o z80adr.o z80ext.o z80mch.o z80pst.o	
+		  assubr.o assym.o gbadr.o gbext.o gbmch.o gbpst.o
 ASSOURCES	= $(patsubst %.o,%.c,$(ASOBJECTS))
 
 ASXZ80		= $(PRJDIR)/bin/as-z80

@@ -13,17 +13,17 @@
  * Extensions: P. Felber
  */
 
-#include <stdio.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <string.h>
 
 #ifdef SDK
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 #undef HUGE
 #endif
 #include "asm.h"
-#include "z80.h"
+#include "gb.h"
 
 /*)Module	asmain.c
  *
@@ -155,173 +155,186 @@
 
 int main(int argc, char **argv)
 {
-	char *p;
-	int c, i;
-	struct area *ap;
+    char *p;
+    int c, i;
+    struct area *ap;
 
 #ifdef SDK
-	inpfil = -2;
-#else /* SDK */
-	fprintf(stdout, "\n");
-	inpfil = -1;
-#endif /* SDK */
-	pflag = 1;
-	for (i=1; i<argc; ++i) {
-		p = argv[i];
-		if (*p == '-') {
-			if (inpfil >= 0)
-				usage();
-			++p;
-			while ((c = *p++) != 0)
-				switch(c) {
+    inpfil = -2;
+#else  // SDK
+    fprintf(stdout, "\n");
+    inpfil = -1;
+#endif // SDK
+    pflag = 1;
+    for (i = 1; i < argc; ++i) {
+        p = argv[i];
+        if (*p == '-') {
+            if (inpfil >= 0)
+                usage();
+            ++p;
+            while ((c = *p++) != 0)
+                switch (c) {
 
-				case 'a':
-				case 'A':
-					++aflag;
-					break;
+                case 'a':
+                case 'A':
+                    ++aflag;
+                    break;
 
-				case 'g':
-				case 'G':
-					++gflag;
-					break;
+                case 'g':
+                case 'G':
+                    ++gflag;
+                    break;
 
-				case 'l':
-				case 'L':
-					++lflag;
-					break;
+                case 'l':
+                case 'L':
+                    ++lflag;
+                    break;
 
-				case 'o':
-				case 'O':
-					++oflag;
-					break;
+                case 'o':
+                case 'O':
+                    ++oflag;
+                    break;
 
-				case 's':
-				case 'S':
-					++sflag;
-					break;
+                case 's':
+                case 'S':
+                    ++sflag;
+                    break;
 
-				case 'p':
-				case 'P':
-					pflag = 0;
-					break;
+                case 'p':
+                case 'P':
+                    pflag = 0;
+                    break;
 
-				case 'x':
-				case 'X':
-					xflag = 0;
-					break;
+                case 'x':
+                case 'X':
+                    xflag = 0;
+                    break;
 
-				case 'q':
-				case 'Q':
-					xflag = 1;
-					break;
+                case 'q':
+                case 'Q':
+                    xflag = 1;
+                    break;
 
-				case 'd':
-				case 'D':
-					xflag = 2;
-					break;
+                case 'd':
+                case 'D':
+                    xflag = 2;
+                    break;
 
-				case 'f':
-				case 'F':
-					++fflag;
-					break;
+                case 'f':
+                case 'F':
+                    ++fflag;
+                    break;
 
-				default:
-					usage();
-				}
-		} else {
+                default:
+                    usage();
+                }
+        }
+        else {
 #ifdef SDK
-			if(inpfil != -2) {
-#endif /* SDK */
-			if (++inpfil == MAXFIL) {
-				fprintf(stderr, "too many input files\n");
-				asexit(1);
-			}
-			sfp[inpfil] = afile(p, "", 0);
-			strcpy(srcfn[inpfil],afn);
+            if (inpfil != -2) {
+#endif // SDK
+                if (++inpfil == MAXFIL) {
+                    fprintf(stderr, "too many input files\n");
+                    asexit(1);
+                }
+                sfp[inpfil] = afile(p, "", 0);
+                strcpy(srcfn[inpfil], afn);
 #ifdef SDK
-			} else
-				inpfil++;
-			if (inpfil == -1) {
-				if (lflag)
-					lfp = afile(p, "lst", 1);
-				if (oflag)
-					ofp = afile(p, "", 1);
-				if (sflag)
-					tfp = afile(p, "sym", 1);
-			}
-#else /* SDK */
-			if (inpfil == 0) {
-				if (lflag)
-					lfp = afile(p, "LST", 1);
-				if (oflag)
-					ofp = afile(p, "REL", 1);
-				if (sflag)
-					tfp = afile(p, "SYM", 1);
-			}
-#endif /* SDK */
-		}
-	}
-	if (inpfil < 0)
-		usage();
-	syminit();
-	for (pass=0; pass<3; ++pass) {
-		if (gflag && pass == 1)
-			symglob();
-		if (aflag && pass == 1)
-			allglob();
-		if (oflag && pass == 2)
-			outgsd();
-		flevel = 0;
-		tlevel = 0;
-		ifcnd[0] = 0;
-		iflvl[0] = 0;
-		radix = 10;
-		srcline[0] = 0;
-		page = 0;
-		stb[0] = 0;
-		lop  = NLPP;
-		cfile = 0;
-		incfil = -1;
-		for (i = 0; i <= inpfil; i++)
-			rewind(sfp[i]);
-		ap = areap;
-		while (ap) {
-			ap->a_fuzz = 0;
-			ap->a_size = 0;
-			ap = ap->a_ap;
-		}
-		fuzz = 0;
-		dot.s_addr = 0;
-		dot.s_area = &dca;
-		symp = &dot;
-		minit();
-		while (getLine_()) {
-			cp = cb;
-			cpt = cbt;
-			ep = eb;
-			ip = ib;
-			if (setjmp(jump_env) == 0)
-				asmbl();
-			if (pass == 2) {
-				diag();
-				list();
-			}
-		}
-		newdot(dot.s_area); /* Flush area info */
-		if (flevel || tlevel)
-			err('i');
-	}
-	if (oflag)
-		outchk(HUGE, HUGE);  /* Flush */
-	if (sflag) {
-		lstsym(tfp);
-	} else
-	if (lflag) {
-		lstsym(lfp);
-	}
-	asexit(aserr != 0);
-	/* Never reached */
-	return 0;
+            }
+            else
+                inpfil++;
+            if (inpfil == -1) {
+                if (lflag)
+                    lfp = afile(p, "lst", 1);
+                if (oflag)
+                    ofp = afile(p, "", 1);
+                if (sflag)
+                    tfp = afile(p, "sym", 1);
+            }
+#else  // SDK
+            if (inpfil == 0) {
+                if (lflag)
+                    lfp = afile(p, "LST", 1);
+                if (oflag)
+                    ofp = afile(p, "REL", 1);
+                if (sflag)
+                    tfp = afile(p, "SYM", 1);
+            }
+#endif // SDK
+        }
+    }
+    if (inpfil < 0)
+        usage();
+
+    syminit();
+
+    for (pass = 0; pass < 3; ++pass) {
+        if (gflag && pass == 1)
+            symglob();
+        if (aflag && pass == 1)
+            allglob();
+        if (oflag && pass == 2)
+            outgsd();
+
+        flevel = 0;
+        tlevel = 0;
+        ifcnd[0] = 0;
+        iflvl[0] = 0;
+        radix = 10;
+        srcline[0] = 0;
+        page = 0;
+        stb[0] = 0;
+        lop = NLPP;
+        cfile = 0;
+        incfil = -1;
+
+        for (i = 0; i <= inpfil; i++)
+            rewind(sfp[i]);
+
+        ap = areap;
+
+        while (ap) {
+            ap->a_fuzz = 0;
+            ap->a_size = 0;
+            ap = ap->a_ap;
+        }
+
+        fuzz = 0;
+        dot.s_addr = 0;
+        dot.s_area = &dca;
+        symp = &dot;
+
+        while (getLine_()) {
+            cp = cb;
+            cpt = cbt;
+            ep = eb;
+            ip = ib;
+            if (setjmp(jump_env) == 0)
+                asmbl();
+            if (pass == 2) {
+                diag();
+                list();
+            }
+        }
+
+        newdot(dot.s_area); /* Flush area info */
+        if (flevel || tlevel)
+            err('i');
+    }
+
+    if (oflag)
+        outchk(HUGE, HUGE); /* Flush */
+
+    if (sflag) {
+        lstsym(tfp);
+    }
+    else if (lflag) {
+        lstsym(lfp);
+    }
+
+    asexit(aserr != 0);
+    /* Never reached */
+    return 0;
 }
 
 /*)Function	VOID	asexit(i)
@@ -351,21 +364,22 @@ int main(int argc, char **argv)
 
 void asexit(int i)
 {
-	int j;
+    if (lfp != NULL)
+        fclose(lfp);
+    if (ofp != NULL)
+        fclose(ofp);
+    if (tfp != NULL)
+        fclose(tfp);
 
-	if (lfp != NULL) fclose(lfp);
-	if (ofp != NULL) fclose(ofp);
-	if (tfp != NULL) fclose(tfp);
+    for (int j = 0; j < MAXFIL && sfp[j] != NULL; j++) {
+        fclose(sfp[j]);
+    }
 
-	for (j=0; j<MAXFIL && sfp[j] != NULL; j++) {
-		fclose(sfp[j]);
-	}
+    for (int j = 0; j < MAXINC && ifp[j] != NULL; j++) {
+        fclose(ifp[j]);
+    }
 
-	for (j=0; j<MAXINC && ifp[j] != NULL; j++) {
-		fclose(ifp[j]);
-	}
-
-	exit(i);
+    exit(i);
 }
 
 /*)Function	VOID	asmbl()
@@ -459,518 +473,527 @@ void asexit(int i)
 
 void asmbl()
 {
-	struct mne *mp;
-	struct sym *sp;
-	struct tsym *tp;
-	int c;
-	struct area  *ap;
-	struct expr e1;
-	char id[NCPS];
-	char opt[NCPS];
-	char fn[FILSPC];
-	char *p;
-	int d, n, uaf, uf;
+    struct mne *mp;
+    struct sym *sp;
+    struct tsym *tp;
+    struct area *ap;
+    struct expr e1;
+    char id[NCPS];
+    char opt[NCPS];
+    char fn[FILSPC];
+    char *p;
+    int c, d, n, uaf, uf;
 
 #ifdef SDK
-	double f1, f2;
-	unsigned int mantissa, exponent;
-	const signed char readbuffer[80];
+    double f1, f2;
+    unsigned int mantissa, exponent;
+    const signed char readbuffer[80];
 #endif
-	laddr = dot.s_addr;
-	lmode = SLIST;
+    laddr = dot.s_addr;
+    lmode = SLIST;
 loop:
-	if ((c=endline()) == 0) { return; }
-	/*
-	 * If the first character is a digit then assume
-	 * a local symbol is being specified.  The symbol
-	 * must end with $: to be valid.
-	 *	pass 0:
-	 *		Construct a tsym structure at the first
-	 *		occurance of the symbol.  Flag the symbol
-	 *		as multiply defined if not the first occurance.
-	 *	pass 1:
-	 *		Load area, address, and fuzz values
-	 *		into structure tsym.
-	 *	pass 2:
-	 *		Check for assembler phase error and
-	 *		multiply defined error.
-	 */
-	if (ctype[c] & DIGIT) {
-		if (flevel)
-			return;
-		n = 0;
-		while ((d = digit(c, 10)) >= 0) {
-			n = 10*n + d;
-			c = get();
-		}
-		if (c != '$' || get() != ':')
-			qerr();
-		tp = symp->s_tsym;
-		if (pass == 0) {
-			while (tp) {
-				if (n == tp->t_num) {
-					tp->t_flg |= S_MDF;
-					break;
-				}
-				tp = tp->t_lnk;
-			}
-			if (tp == NULL) {
-				tp=(struct tsym *) new (sizeof(struct tsym));
-				tp->t_lnk = symp->s_tsym;
-				tp->t_num = n;
-				tp->t_flg = 0;
-				tp->t_area = dot.s_area;
-				tp->t_addr = dot.s_addr;
-				symp->s_tsym = tp;
-			}
-		} else {
-			while (tp) {
-				if (n == tp->t_num) {
-					break;
-				}
-				tp = tp->t_lnk;
-			}
-			if (tp) {
-				if (pass == 1) {
-					fuzz = tp->t_addr - dot.s_addr;
-					tp->t_area = dot.s_area;
-					tp->t_addr = dot.s_addr;
-				} else {
-					phase(tp->t_area, tp->t_addr);
-					if (tp->t_flg & S_MDF)
-						err('m');
-				}
-			} else {
-				err('u');
-			}
-		}
-		lmode = ALIST;
-		goto loop;
-	}
-	/*
-	 * If the first character is a letter then assume a lable,
-	 * symbol, assembler directive, or assembler mnemonic is
-	 * being processed.
-	 */
-	if ((ctype[c] & LETTER) == 0) {
-            	if (flevel) {
-                        return;
-                } else {
-			qerr();
-		}
+    if ((c = endline()) == 0) {
+        return;
+    }
+    /*
+     * If the first character is a digit then assume
+     * a local symbol is being specified.  The symbol
+     * must end with $: to be valid.
+     *	pass 0:
+     *		Construct a tsym structure at the first
+     *		occurance of the symbol.  Flag the symbol
+     *		as multiply defined if not the first occurance.
+     *	pass 1:
+     *		Load area, address, and fuzz values
+     *		into structure tsym.
+     *	pass 2:
+     *		Check for assembler phase error and
+     *		multiply defined error.
+     */
+    if (ctype[c] & DIGIT) {
+        if (flevel)
+            return;
+        n = 0;
+        while ((d = digit(c, 10)) >= 0) {
+            n = 10 * n + d;
+            c = get();
         }
-	getid(id, c);
-	c = getnb();
-	/*
-	 * If the next character is a : then a label is being processed.
-	 * A double :: defines a global label.  If this is new label
-	 * then create a symbol structure.
-	 *	pass 0:
-	 *		Flag multiply defined labels.
-	 *	pass 1:
-	 *		Load area, address, and fuzz values
-	 *		into structure symp.
-	 *	pass 2:
-	 *		Check for assembler phase error and
-	 *		multiply defined error.
-	 */
-	if (c == ':') {
-		if (flevel)
-			return;
-		if ((c = get()) != ':') {
-			unget(c);
-			c = 0;
-		}
-		symp = lookup(id);
-		if (symp == &dot)
-			err('.');
-		if (pass == 0)
-			if ((symp->s_type != S_NEW) &&
-			   ((symp->s_flag & S_ASG) == 0))
-				symp->s_flag |= S_MDF;
-		if (pass != 2) {
-			fuzz = symp->s_addr - dot.s_addr;
-			symp->s_type = S_USER;
-			symp->s_area = dot.s_area;
-			symp->s_addr = dot.s_addr;
-		} else {
-			if (symp->s_flag & S_MDF)
-				err('m');
-			phase(symp->s_area, symp->s_addr);
-		}
-		if (c) {
-			symp->s_flag |= S_GBL;
-		}
-		lmode = ALIST;
-		goto loop;
-	}
-	/*
-	 * If the next character is a = then an equate is being processed.
-	 * A double == defines a global equate.  If this is new variable
-	 * then create a symbol structure.
-	 */
-	if (c == '=') {
-		if (flevel)
-			return;
-		if ((c = get()) != '=') {
-			unget(c);
-			c = 0;
-		}
-		clrexpr(&e1);
-		expr(&e1, 0);
-		sp = lookup(id);
-		if (sp == &dot) {
-			outall();
-			if (e1.e_flag || e1.e_base.e_ap != dot.s_area)
-				err('.');
-		} else
-		if (sp->s_type != S_NEW && (sp->s_flag & S_ASG) == 0) {
-			err('m');
-		}
-		sp->s_type = S_USER;
-		sp->s_area = e1.e_base.e_ap;
-		sp->s_addr = laddr = e1.e_addr;
-		sp->s_flag |= S_ASG;
-		if (c) {
-			sp->s_flag |= S_GBL;
-		}
-		lmode = ELIST;
-		goto loop;
-	}
-	unget(c);
-	lmode = flevel ? SLIST : CLIST;
-	if ((mp = mlookup(id)) == NULL) {
-		if (!flevel)
-			err('o');
-		return;
-	}
-	/*
-	 * If we have gotten this far then we have found an
-	 * assembler directive or an assembler mnemonic.
-	 *
-	 * Check for .if, .else, .endif, and .page directives
-	 * which are not controlled by the conditional flags
-	 */
-	switch (mp->m_type) {
+        if (c != '$' || get() != ':')
+            qerr();
+        tp = symp->s_tsym;
+        if (pass == 0) {
+            while (tp) {
+                if (n == tp->t_num) {
+                    tp->t_flg |= S_MDF;
+                    break;
+                }
+                tp = tp->t_lnk;
+            }
+            if (tp == NULL) {
+                tp = gb_malloc(sizeof(struct tsym));
+                tp->t_lnk = symp->s_tsym;
+                tp->t_num = n;
+                tp->t_flg = 0;
+                tp->t_area = dot.s_area;
+                tp->t_addr = dot.s_addr;
+                symp->s_tsym = tp;
+            }
+        }
+        else {
+            while (tp) {
+                if (n == tp->t_num) {
+                    break;
+                }
+                tp = tp->t_lnk;
+            }
+            if (tp) {
+                if (pass == 1) {
+                    fuzz = tp->t_addr - dot.s_addr;
+                    tp->t_area = dot.s_area;
+                    tp->t_addr = dot.s_addr;
+                }
+                else {
+                    phase(tp->t_area, tp->t_addr);
+                    if (tp->t_flg & S_MDF)
+                        err('m');
+                }
+            }
+            else {
+                err('u');
+            }
+        }
+        lmode = ALIST;
+        goto loop;
+    }
+    /* If the first character is a letter then assume a lable, symbol,
+     * assembler directive, or assembler mnemonic is being processed. */
+    if ((ctype[c] & LETTER) == 0) {
+        if (flevel) {
+            return;
+        }
+        else {
+            qerr();
+        }
+    }
+    getid(id, c);
+    c = getnb();
+    /*
+     * If the next character is a : then a label is being processed.
+     * A double :: defines a global label.  If this is new label
+     * then create a symbol structure.
+     *	pass 0:
+     *		Flag multiply defined labels.
+     *	pass 1:
+     *		Load area, address, and fuzz values
+     *		into structure symp.
+     *	pass 2:
+     *		Check for assembler phase error and
+     *		multiply defined error.
+     */
+    if (c == ':') {
+        if (flevel)
+            return;
+        if ((c = get()) != ':') {
+            unget(c);
+            c = 0;
+        }
+        symp = lookup(id);
+        if (symp == &dot)
+            err('.');
+        if (pass == 0)
+            if ((symp->s_type != S_NEW) && ((symp->s_flag & S_ASG) == 0))
+                symp->s_flag |= S_MDF;
+        if (pass != 2) {
+            fuzz = symp->s_addr - dot.s_addr;
+            symp->s_type = S_USER;
+            symp->s_area = dot.s_area;
+            symp->s_addr = dot.s_addr;
+        }
+        else {
+            if (symp->s_flag & S_MDF)
+                err('m');
+            phase(symp->s_area, symp->s_addr);
+        }
+        if (c) {
+            symp->s_flag |= S_GBL;
+        }
+        lmode = ALIST;
+        goto loop;
+    }
+    /* If the next character is a = then an equate is being processed.
+     * A double == defines a global equate.  If this is new variable
+     * then create a symbol structure. */
+    if (c == '=') {
+        if (flevel)
+            return;
+        if ((c = get()) != '=') {
+            unget(c);
+            c = 0;
+        }
+        clrexpr(&e1);
+        expr(&e1, 0);
+        sp = lookup(id);
+        if (sp == &dot) {
+            outall();
+            if (e1.e_flag || e1.e_base.e_ap != dot.s_area)
+                err('.');
+        }
+        else if (sp->s_type != S_NEW && (sp->s_flag & S_ASG) == 0) {
+            err('m');
+        }
+        sp->s_type = S_USER;
+        sp->s_area = e1.e_base.e_ap;
+        sp->s_addr = laddr = e1.e_addr;
+        sp->s_flag |= S_ASG;
+        if (c) {
+            sp->s_flag |= S_GBL;
+        }
+        lmode = ELIST;
+        goto loop;
+    }
+    unget(c);
+    lmode = flevel ? SLIST : CLIST;
+    if ((mp = mlookup(id)) == NULL) {
+        if (!flevel)
+            err('o');
+        return;
+    }
+    /*
+     * If we have gotten this far then we have found an
+     * assembler directive or an assembler mnemonic.
+     *
+     * Check for .if, .else, .endif, and .page directives
+     * which are not controlled by the conditional flags
+     */
+    switch (mp->m_type) {
 
-	case S_IF:
-		n = absexpr();
-		if (tlevel < MAXIF) {
-			++tlevel;
-			ifcnd[tlevel] = n;
-			iflvl[tlevel] = flevel;
-			if (n == 0) {
-				++flevel;
-			}
-		} else {
-			err('i');
-		}
-		lmode = ELIST;
-		laddr = n;
-		return;
+    case S_IF:
+        n = absexpr();
+        if (tlevel < MAXIF) {
+            ++tlevel;
+            ifcnd[tlevel] = n;
+            iflvl[tlevel] = flevel;
+            if (n == 0) {
+                ++flevel;
+            }
+        }
+        else {
+            err('i');
+        }
+        lmode = ELIST;
+        laddr = n;
+        return;
 
-	case S_ELSE:
-		if (ifcnd[tlevel]) {
-			if (++flevel > (iflvl[tlevel]+1)) {
-				err('i');
-			}
-		} else {
-			if (--flevel < iflvl[tlevel]) {
-				err('i');
-			}
-		}
-		lmode = SLIST;
-		return;
+    case S_ELSE:
+        if (ifcnd[tlevel]) {
+            if (++flevel > (iflvl[tlevel] + 1)) {
+                err('i');
+            }
+        }
+        else {
+            if (--flevel < iflvl[tlevel]) {
+                err('i');
+            }
+        }
+        lmode = SLIST;
+        return;
 
-	case S_ENDIF:
-		if (tlevel) {
-			flevel = iflvl[tlevel--];
-		} else {
-			err('i');
-		}
-		lmode = SLIST;
-		return;
+    case S_ENDIF:
+        if (tlevel) {
+            flevel = iflvl[tlevel--];
+        }
+        else {
+            err('i');
+        }
+        lmode = SLIST;
+        return;
 
-	case S_PAGE:
-		lop = NLPP;
-		lmode = NLIST;
-		return;
+    case S_PAGE:
+        lop = NLPP;
+        lmode = NLIST;
+        return;
 
-	default:
-		break;
-	}
-	if (flevel)
-		return;
-	/*
-	 * If we are not in a false state for .if/.else then
-	 * process the assembler directives here.
-	 */
-	switch (mp->m_type) {
+    default:
+        break;
+    }
+    if (flevel)
+        return;
+    /*
+     * If we are not in a false state for .if/.else then
+     * process the assembler directives here.
+     */
+    switch (mp->m_type) {
 
-	case S_EVEN:
-		outall();
-		laddr = dot.s_addr = (dot.s_addr + 1) & ~1;
-		lmode = ALIST;
-		break;
+    case S_EVEN:
+        outall();
+        laddr = dot.s_addr = (dot.s_addr + 1) & ~1;
+        lmode = ALIST;
+        break;
 
-	case S_ODD:
-		outall();
-		laddr = dot.s_addr |= 1;
-		lmode = ALIST;
-		break;
+    case S_ODD:
+        outall();
+        laddr = dot.s_addr |= 1;
+        lmode = ALIST;
+        break;
 
-	case S_BYTE:
-	case S_WORD:
-		do {
-			clrexpr(&e1);
-			expr(&e1, 0);
-			if (mp->m_type == S_BYTE) {
-				outrb(&e1, R_NORM);
-			} else {
-				outrw(&e1, R_NORM);
-			}
-		} while ((c = getnb()) == ',');
-		unget(c);
-		break;
+    case S_BYTE:
+    case S_WORD:
+        do {
+            clrexpr(&e1);
+            expr(&e1, 0);
+            if (mp->m_type == S_BYTE) {
+                outrb(&e1, R_NORM);
+            }
+            else {
+                outrw(&e1, R_NORM);
+            }
+        } while ((c = getnb()) == ',');
+        unget(c);
+        break;
 
 #ifdef SDK
-	case S_FLOAT:
-		do {
-			getid( readbuffer, ' ' ); /* Hack :) */
-			if ((c=getnb())=='.') 
-			  {
-				  getid(&readbuffer[strlen(readbuffer)],'.');
-			  }
-			else
-			    unget(c);
+    case S_FLOAT:
+        do {
+            getid(readbuffer, ' '); /* Hack :) */
+            if ((c = getnb()) == '.') {
+                getid(&readbuffer[strlen(readbuffer)], '.');
+            }
+            else
+                unget(c);
 
-			f1 = strtod( readbuffer, (char **)NULL );
-			/* Convert f1 to a gb-lib type fp
-			 * 24 bit mantissa followed by 7 bit exp and 1 bit sign
-			*/
-			
-			if (f1!=0) 
-			  {
-				  
-				  f2 = floor(log(fabs(f1))/log(2))+1;
-				  mantissa = (unsigned int) ((0x1000000*fabs(f1))/exp(f2*log(2))) ;
-				  mantissa &=0xffffff;
-				  exponent = (unsigned int) (f2 + 0x40) ;
-				  if (f1<0)
-				      exponent |=0x80;
-			  }
-			
-			else 
-			  {
-				  mantissa=0;
-				  exponent=0;
-			  }
-			
-			outab(mantissa&0xff);
-			outab((mantissa>>8)&0xff);
-			outab((mantissa>>16)&0xff);
-			outab(exponent&0xff);
-			
-		} while ((c = getnb()) == ',');
-		unget(c);
-		break;
+            f1 = strtod(readbuffer, (char **)NULL);
+            /* Convert f1 to a gb-lib type fp
+             * 24 bit mantissa followed by 7 bit exp and 1 bit sign
+             */
+
+            if (f1 != 0) {
+
+                f2 = floor(log(fabs(f1)) / log(2)) + 1;
+                mantissa = (unsigned int)((0x1000000 * fabs(f1)) / exp(f2 * log(2)));
+                mantissa &= 0xffffff;
+                exponent = (unsigned int)(f2 + 0x40);
+                if (f1 < 0)
+                    exponent |= 0x80;
+            }
+
+            else {
+                mantissa = 0;
+                exponent = 0;
+            }
+
+            outab(mantissa & 0xff);
+            outab((mantissa >> 8) & 0xff);
+            outab((mantissa >> 16) & 0xff);
+            outab(exponent & 0xff);
+
+        } while ((c = getnb()) == ',');
+        unget(c);
+        break;
 #endif
 
-	case S_ASCII:
-	case S_ASCIZ:
-		if ((d = getnb()) == '\0')
-			qerr();
-		while ((c = getmap(d)) >= 0)
-			outab(c);
-		if (mp->m_type == S_ASCIZ)
-			outab(0);
-		break;
+    case S_ASCII:
+    case S_ASCIZ:
+        if ((d = getnb()) == '\0')
+            qerr();
+        while ((c = getmap(d)) >= 0)
+            outab(c);
+        if (mp->m_type == S_ASCIZ)
+            outab(0);
+        break;
 
-	case S_ASCIS:
-		if ((d = getnb()) == '\0')
-			qerr();
-		c = getmap(d);
-		while (c >= 0) {
-			if ((n = getmap(d)) >= 0) {
-				outab(c);
-			} else {
-				outab(c | 0x80);
-			}
-			c = n;
-		}
-		break;
+    case S_ASCIS:
+        if ((d = getnb()) == '\0')
+            qerr();
+        c = getmap(d);
+        while (c >= 0) {
+            if ((n = getmap(d)) >= 0) {
+                outab(c);
+            }
+            else {
+                outab(c | 0x80);
+            }
+            c = n;
+        }
+        break;
 
-	case S_BLK:
-		clrexpr(&e1);
-		expr(&e1, 0);
-		dot.s_addr += e1.e_addr*mp->m_valu;
-		outchk(HUGE,HUGE);
-		lmode = BLIST;
-		break;
+    case S_BLK:
+        clrexpr(&e1);
+        expr(&e1, 0);
+        dot.s_addr += e1.e_addr * mp->m_valu;
+        outchk(HUGE, HUGE);
+        lmode = BLIST;
+        break;
 
-	case S_TITLE:
-		p = tb;
-		if ((c = getnb()) != 0) {
-			do {
-				if (p < &tb[NTITL-1])
-					*p++ = c;
-			} while ((c = get()) != 0);
-		}
-		*p = 0;
-		unget(c);
-		lmode = SLIST;
-		break;
+    case S_TITLE:
+        p = tb;
+        if ((c = getnb()) != 0) {
+            do {
+                if (p < &tb[NTITL - 1])
+                    *p++ = c;
+            } while ((c = get()) != 0);
+        }
+        *p = 0;
+        unget(c);
+        lmode = SLIST;
+        break;
 
-	case S_SBTL:
-		p = stb;
-		if ((c = getnb()) != 0) {
-			do {
-				if (p < &stb[NSBTL-1])
-					*p++ = c;
-			} while ((c = get()) != 0);
-		}
-		*p = 0;
-		unget(c);
-		lmode = SLIST;
-		break;
+    case S_SBTL:
+        p = stb;
+        if ((c = getnb()) != 0) {
+            do {
+                if (p < &stb[NSBTL - 1])
+                    *p++ = c;
+            } while ((c = get()) != 0);
+        }
+        *p = 0;
+        unget(c);
+        lmode = SLIST;
+        break;
 
-	case S_MODUL:
-		getst(id, -1);
-		if (pass == 0) {
-			if (module[0]) {
-				err('m');
-			} else {
-				strncpy(module, id, NCPS);
-			}
-		}
-		lmode = SLIST;
-		break;
+    case S_MODUL:
+        getst(id, -1);
+        if (pass == 0) {
+            if (module[0]) {
+                err('m');
+            }
+            else {
+                strncpy(module, id, NCPS);
+            }
+        }
+        lmode = SLIST;
+        break;
 
-	case S_GLOBL:
-		do {
-			getid(id, -1);
-			sp = lookup(id);
-			sp->s_flag |= S_GBL;
-		} while ((c = getnb()) == ',');
-		unget(c);
-		lmode = SLIST;
-		break;
+    case S_GLOBL:
+        do {
+            getid(id, -1);
+            sp = lookup(id);
+            sp->s_flag |= S_GBL;
+        } while ((c = getnb()) == ',');
+        unget(c);
+        lmode = SLIST;
+        break;
 
-	case S_DAREA:
-		getid(id, -1);
-		uaf = 0;
-		uf  = A_CON|A_REL;
-		if ((c = getnb()) == '(') {
-			do {
-				getid(opt, -1);
-				mp = mlookup(opt);
-				if (mp && mp->m_type == S_ATYP) {
-					++uaf;
-					uf |= mp->m_valu;
-				} else {
-					err('u');
-				}
-			} while ((c = getnb()) == ',');
-			if (c != ')')
-				qerr();
-		} else {
-			unget(c);
-		}
-		if ((ap = alookup(id)) != NULL) {
-			if (uaf && uf != ap->a_flag)
-				err('m');
-		} else {
-			ap = (struct area *) new (sizeof(struct area));
-			ap->a_ap = areap;
-			strncpy(ap->a_id, id, NCPS);
-			ap->a_ref = areap->a_ref + 1;
-			ap->a_size = 0;
-			ap->a_fuzz = 0;
-			ap->a_flag = uaf ? uf : (A_CON|A_REL);
-			areap = ap;
-		}
-		newdot(ap);
-		lmode = SLIST;
-		break;
+    case S_DAREA:
+        getid(id, -1);
+        uaf = 0;
+        uf = A_CON | A_REL;
+        if ((c = getnb()) == '(') {
+            do {
+                getid(opt, -1);
+                mp = mlookup(opt);
+                if (mp && mp->m_type == S_ATYP) {
+                    ++uaf;
+                    uf |= mp->m_valu;
+                }
+                else {
+                    err('u');
+                }
+            } while ((c = getnb()) == ',');
+            if (c != ')')
+                qerr();
+        }
+        else {
+            unget(c);
+        }
+        if ((ap = alookup(id)) != NULL) {
+            if (uaf && uf != ap->a_flag)
+                err('m');
+        }
+        else {
+            ap = gb_malloc(sizeof(struct area));
+            ap->a_ap = areap;
+            strncpy(ap->a_id, id, NCPS);
+            ap->a_ref = areap->a_ref + 1;
+            ap->a_size = 0;
+            ap->a_fuzz = 0;
+            ap->a_flag = uaf ? uf : (A_CON | A_REL);
+            areap = ap;
+        }
+        newdot(ap);
+        lmode = SLIST;
+        break;
 
-	case S_ORG:
-		if (dot.s_area->a_flag & A_ABS) {
-			outall();
-			laddr = dot.s_addr = absexpr();
-		} else {
-			err('o');
-		}
-		outall();
-		lmode = ALIST;
-		break;
+    case S_ORG:
+        if (dot.s_area->a_flag & A_ABS) {
+            outall();
+            laddr = dot.s_addr = absexpr();
+        }
+        else {
+            err('o');
+        }
+        outall();
+        lmode = ALIST;
+        break;
 
-	case S_RADIX:
-		if (more()) {
-			switch (getnb()) {
-			case 'b':
-			case 'B':
-				radix = 2;
-				break;
-			case '@':
-			case 'o':
-			case 'O':
-			case 'q':
-			case 'Q':
-				radix = 8;
-				break;
-			case 'd':
-			case 'D':
-				radix = 10;
-				break;
-			case 'h':
-			case 'H':
-			case 'x':
-			case 'X':
-				radix = 16;
-				break;
-			default:
-				radix = 10;
-				qerr();
-				break;
-			}
-		} else {
-			radix = 10;
-		}
-		lmode = SLIST;
-		break;
+    case S_RADIX:
+        if (more()) {
+            switch (getnb()) {
+            case 'b':
+            case 'B':
+                radix = 2;
+                break;
+            case '@':
+            case 'o':
+            case 'O':
+            case 'q':
+            case 'Q':
+                radix = 8;
+                break;
+            case 'd':
+            case 'D':
+                radix = 10;
+                break;
+            case 'h':
+            case 'H':
+            case 'x':
+            case 'X':
+                radix = 16;
+                break;
+            default:
+                radix = 10;
+                qerr();
+                break;
+            }
+        }
+        else {
+            radix = 10;
+        }
+        lmode = SLIST;
+        break;
 
-	case S_INCL:
-		d = getnb();
-		p = fn;
-		while ((c = get()) != d) {
-			if (p < &fn[FILSPC-1]) {
-				*p++ = c;
-			} else {
-				break;
-			}
-		}
-		*p = 0;
-		if (++incfil == MAXINC ||
-		   (ifp[incfil] = fopen(fn, "r")) == NULL) {
-			--incfil;
-			err('i');
-		} else {
-			lop = NLPP;
-			incline[incfil] = 0;
-			strcpy(incfn[incfil],fn);
-		}
-		lmode = SLIST;
-		break;
+    case S_INCL:
+        d = getnb();
+        p = fn;
+        while ((c = get()) != d) {
+            if (p < &fn[FILSPC - 1]) {
+                *p++ = c;
+            }
+            else {
+                break;
+            }
+        }
+        *p = 0;
+        if (++incfil == MAXINC || (ifp[incfil] = fopen(fn, "r")) == NULL) {
+            --incfil;
+            err('i');
+        }
+        else {
+            lop = NLPP;
+            incline[incfil] = 0;
+            strcpy(incfn[incfil], fn);
+        }
+        lmode = SLIST;
+        break;
 
-	/*
-	 * If not an assembler directive then go to
-	 * the machine dependent function which handles
-	 * all the assembler mnemonics.
-	 */
-	default:
-		machine(mp);
-	}
-	goto loop;
+    /*
+     * If not an assembler directive then go to
+     * the machine dependent function which handles
+     * all the assembler mnemonics.
+     */
+    default:
+        machine(mp);
+    }
+    goto loop;
 }
 
 /*)Function	FILE *	afile(fn, ft, wf)
@@ -1016,41 +1039,41 @@ loop:
 
 FILE *afile(char *fn, char *ft, int wf)
 {
-	char *p2, *p3;
-	int c;
-	FILE *fp;
+    char *p2, *p3;
+    int c;
+    FILE *fp;
 
-	p2 = afn;
-	p3 = ft;
+    p2 = afn;
+    p3 = ft;
 
-	strcpy (afn, fn);
-	p2 = strrchr (afn, FSEPX);		// search last '.'
-	if (!p2)
-		p2 = afn + strlen (afn);
-	if (p2 > &afn[FILSPC-4])		// truncate filename, if it's too long
-		p2 = &afn[FILSPC-4];
-	*p2++ = FSEPX;
+    strcpy(afn, fn);
+    p2 = strrchr(afn, FSEPX); // search last '.'
+    if (!p2)
+        p2 = afn + strlen(afn);
+    if (p2 > &afn[FILSPC - 4]) // truncate filename, if it's too long
+        p2 = &afn[FILSPC - 4];
+    *p2++ = FSEPX;
 
-	// choose a file-extension
-	if (*p3 == 0) {					// extension supplied?
-		p3 = strrchr (fn, FSEPX);	// no: extension in fn?
-		if (p3)
-			++p3;
-		else
-			p3 = dsft;					// no: default extension
-	}
+    // choose a file-extension
+    if (*p3 == 0) {              // extension supplied?
+        p3 = strrchr(fn, FSEPX); // no: extension in fn?
+        if (p3)
+            ++p3;
+        else
+            p3 = dsft; // no: default extension
+    }
 
-	while ((c = *p3++) != 0) {		// strncpy
-		if (p2 < &afn[FILSPC-1])
-			*p2++ = c;
-	}
-	*p2++ = 0;
+    while ((c = *p3++) != 0) { // strncpy
+        if (p2 < &afn[FILSPC - 1])
+            *p2++ = c;
+    }
+    *p2++ = 0;
 
-	if ((fp = fopen(afn, wf?"w":"r")) == NULL) {
-		fprintf(stderr, "%s: cannot %s.\n", afn, wf?"create":"open");
-		asexit(1);
-	}
-	return (fp);
+    if ((fp = fopen(afn, wf ? "w" : "r")) == NULL) {
+        fprintf(stderr, "%s: cannot %s.\n", afn, wf ? "create" : "open");
+        asexit(1);
+    }
+    return (fp);
 }
 
 /*)Function	VOID	newdot(nap)
@@ -1083,15 +1106,15 @@ FILE *afile(char *fn, char *ft, int wf)
 
 void newdot(struct area *nap)
 {
-	struct area *oap;
+    struct area *oap;
 
-	oap = dot.s_area;
-	oap->a_fuzz = fuzz;
-	oap->a_size = dot.s_addr;
-	fuzz = nap->a_fuzz;
-	dot.s_area = nap;
-	dot.s_addr = nap->a_size;
-	outall();
+    oap = dot.s_area;
+    oap->a_fuzz = fuzz;
+    oap->a_size = dot.s_addr;
+    fuzz = nap->a_fuzz;
+    dot.s_area = nap;
+    dot.s_addr = nap->a_size;
+    outall();
 }
 
 /*)Function	VOID	phase(ap, a)
@@ -1120,49 +1143,18 @@ void newdot(struct area *nap)
 
 void phase(struct area *ap, Addr_T a)
 {
-	if (ap != dot.s_area || a != dot.s_addr)
-		err('p');
+    if (ap != dot.s_area || a != dot.s_addr)
+        err('p');
 }
 
-const char *usetxt[] = {
-#ifdef SDK
-	"Usage: [-dqxgalopsf] outfile file1 [file2 file3 ...]",
-#else /* SDK */
-	"Usage: [-dqxgalopsf] file1 [file2 file3 ...]",
-#endif /* SDK */
-	"  d    decimal listing",
-	"  q    octal   listing",
-	"  x    hex     listing (default)",
-	"  g    undefined symbols made global",
-	"  a    all user symbols made global",
-#ifdef SDK
-	"  l    create list   output outfile[LST]",
-	"  o    create object output outfile[o]",
-	"  s    create symbol output outfile[SYM]",
-#else /* SDK */
-	"  l    create list   output file1[LST]",
-	"  o    create object output file1[REL]",
-	"  s    create symbol output file1[SYM]",
-#endif /* SDK */
-	"  p    disable listing pagination",
-	"  f    flag relocatable references by  `   in listing file",
-	" ff    flag relocatable references by mode in listing file",
-	"",
-	0
-};
 
 /*)Function	VOID	usage()
  *
  *	The function usage() outputs to the stderr device the
  *	assembler name and version and a list of valid assembler options.
  *
- *	local variables:
- *		char **	dp		pointer to an array of
- *					text string pointers.
- *
  *	global variables:
  *		char	cpu[]		assembler type string
- *		char *	usetxt[]	array of string pointers
  *
  *	functions called:
  *		VOID	asexit()	asmain.c
@@ -1174,10 +1166,30 @@ const char *usetxt[] = {
 
 void usage(void)
 {
-	char **dp;
+    fprintf(stderr, "\nASxxxx Assembler %s  (%s)\n\n", VERSION, cpu);
 
-	fprintf(stderr, "\nASxxxx Assembler %s  (%s)\n\n", VERSION, cpu);
-	for (dp = usetxt; *dp; dp++)
-		fprintf(stderr, "%s\n", *dp);
-	asexit(1);
+#ifdef SDK
+    fprintf(stderr, "Usage: [-dqxgalopsf] outfile file1 [file2 file3 ...]\n");
+#else  // SDK
+    fprintf(stderr, "Usage: [-dqxgalopsf] file1 [file2 file3 ...]\n");
+#endif // SDK
+    fprintf(stderr, "  d    decimal listing\n");
+    fprintf(stderr, "  q    octal   listing\n");
+    fprintf(stderr, "  x    hex     listing (default)\n");
+    fprintf(stderr, "  g    undefined symbols made global\n");
+    fprintf(stderr, "  a    all user symbols made global\n");
+#ifdef SDK
+    fprintf(stderr, "  l    create list   output outfile[LST]\n");
+    fprintf(stderr, "  o    create object output outfile[o]\n");
+    fprintf(stderr, "  s    create symbol output outfile[SYM]\n");
+#else  // SDK
+    fprintf(stderr, "  l    create list   output file1[LST]\n");
+    fprintf(stderr, "  o    create object output file1[REL]\n");
+    fprintf(stderr, "  s    create symbol output file1[SYM]\n");
+#endif // SDK
+    fprintf(stderr, "  p    disable listing pagination\n");
+    fprintf(stderr, "  f    flag relocatable references by  `   in listing file\n");
+    fprintf(stderr, " ff    flag relocatable references by mode in listing file\n");
+
+    asexit(1);
 }

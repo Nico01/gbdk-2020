@@ -1,4 +1,4 @@
-/* aslex.c */
+// aslex.c
 
 /*
  * (C) Copyright 1989-1995
@@ -9,12 +9,10 @@
  * Kent, Ohio  44240
  */
 
-/*
- * Extensions: P. Felber, M. Hope
- */
+// Extensions: P. Felber, M. Hope
 
-#include <stdio.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "asm.h"
@@ -84,21 +82,23 @@
 
 void getid(char *id, int c)
 {
-	char *p;
+    if (c < 0) {
+        c = getnb();
+        if ((ctype[c] & LETTER) == 0)
+            qerr();
+    }
 
-	if (c < 0) {
-		c = getnb();
-		if ((ctype[c] & LETTER) == 0)
-			qerr();
-	}
-	p = id;
-	do {
-		if (p < &id[NCPS])
-			*p++ = c;
-	} while (ctype[c=get()] & (LETTER|DIGIT));
-	unget(c);
-	while (p < &id[NCPS])
-		*p++ = 0;
+    char *p = id;
+
+    do {
+        if (p < &id[NCPS])
+            *p++ = c;
+    } while (ctype[c = get()] & (LETTER | DIGIT));
+
+    unget(c);
+
+    while (p < &id[NCPS])
+        *p++ = 0;
 }
 
 /*)Function	VOID	getst(id,c)
@@ -147,21 +147,23 @@ void getid(char *id, int c)
 
 void getst(char *id, int c)
 {
-	register char *p;
+    if (c < 0) {
+        c = getnb();
+        if ((ctype[c] & LETTER) == 0)
+            qerr();
+    }
 
-	if (c < 0) {
-		c = getnb();
-		if ((ctype[c] & LETTER) == 0)
-			qerr();
-	}
-	p = id;
-	do {
-		if (p < &id[NCPS])
-			*p++ = c;
-	} while (ctype[c=get()] & ~(SPACE|ILL));
-	unget(c);
-	while (p < &id[NCPS])
-		*p++ = 0;
+    char *p = id;
+
+    do {
+        if (p < &id[NCPS])
+            *p++ = c;
+    } while (ctype[c = get()] & ~(SPACE | ILL));
+
+    unget(c);
+
+    while (p < &id[NCPS])
+        *p++ = 0;
 }
 
 /*)Function	char	getnb()
@@ -186,11 +188,11 @@ void getst(char *id, int c)
 
 char getnb(void)
 {
-	int c;
+    int c;
 
-	while ((c=get()) == ' ' || c == '\t')
-		;
-	return c;
+    while ((c = get()) == ' ' || c == '\t')
+        ;
+    return c;
 }
 
 /*)Function	char	get()
@@ -218,12 +220,12 @@ char getnb(void)
 
 char get()
 {
-	int c;
+    int c;
 
-	if ((c = *ip) != 0)
-		++ip;
+    if ((c = *ip) != 0)
+        ++ip;
 
-	return c;
+    return c;
 }
 
 /*)Function	VOID	unget(c)
@@ -256,9 +258,9 @@ char get()
 
 void unget(int c)
 {
-	if (c)
-		if (ip != ib)
-			--ip;
+    if (c)
+        if (ip != ib)
+            --ip;
 }
 
 /*)Function	int	getmap(d)
@@ -293,56 +295,56 @@ void unget(int c)
 
 int getmap(int d)
 {
-	int c, n, v;
+    int c, n, v;
 
-	if ((c=get()) == '\0')
-		qerr();
-	if (c == d)
-		return (-1);
-	if (c == '\\') {
-		c = get();
-		switch (c) {
+    if ((c = get()) == '\0')
+        qerr();
+    if (c == d)
+        return (-1);
+    if (c == '\\') {
+        c = get();
+        switch (c) {
 
-		case 'b':
-			c = '\b';
-			break;
+        case 'b':
+            c = '\b';
+            break;
 
-		case 'f':
-			c = '\f';
-			break;
+        case 'f':
+            c = '\f';
+            break;
 
-		case 'n':
-			c = '\n';
-			break;
+        case 'n':
+            c = '\n';
+            break;
 
-		case 'r':
-			c = '\r';
-			break;
+        case 'r':
+            c = '\r';
+            break;
 
-		case 't':
-			c = '\t';
-			break;
+        case 't':
+            c = '\t';
+            break;
 
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-			n = 0;
-			v = 0;
-			while (++n<=3 && c>='0' && c<='7') {
-				v = (v<<3) + c - '0';
-				c = get();
-			}
-			unget(c);
-			c = v;
-			break;
-		}
-	}
-	return c;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+            n = 0;
+            v = 0;
+            while (++n <= 3 && c >= '0' && c <= '7') {
+                v = (v << 3) + c - '0';
+                c = get();
+            }
+            unget(c);
+            c = v;
+            break;
+        }
+    }
+    return c;
 }
 
 /*)Function	int	getLine_()
@@ -393,38 +395,43 @@ int getmap(int d)
 
 int getLine_(void)
 {
-    int i;
-
-loop:	if (incfil >= 0) {
-		if (fgets(ib, sizeof ib, ifp[incfil]) == NULL) {
+loop:
+    if (incfil >= 0) {
+        if (fgets(ib, sizeof ib, ifp[incfil]) == NULL) {
 #ifdef SDK
-			fclose(ifp[incfil]);
-			ifp[incfil--] = NULL;
-#else /* SDK */
-			fclose(ifp[incfil--]);
-#endif /* SDK */
-			lop = NLPP;
-			goto loop;
-		} else {
-			++incline[incfil];
-		}
-	} else {
-		if (fgets(ib, sizeof ib, sfp[cfile]) == NULL) {
-			if (++cfile <= inpfil) {
-				srcline[cfile] = 0;
-				goto loop;
-			}
-			return (0);
-		} else {
-			++srcline[cfile];
-		}
-	}
-	i = strlen(ib) - 1;
-	if (ib[i] == '\n')
-		ib[i] = 0;
-	if (i >= 1 && ib[i-1] == '\r')
-		ib[i-1] = 0;
-	return (1);
+            fclose(ifp[incfil]);
+            ifp[incfil--] = NULL;
+#else  // SDK
+            fclose(ifp[incfil--]);
+#endif // SDK
+            lop = NLPP;
+            goto loop;
+        }
+        else {
+            ++incline[incfil];
+        }
+    }
+    else {
+        if (fgets(ib, sizeof ib, sfp[cfile]) == NULL) {
+            if (++cfile <= inpfil) {
+                srcline[cfile] = 0;
+                goto loop;
+            }
+            return 0;
+        }
+        else {
+            ++srcline[cfile];
+        }
+    }
+
+    int i = strlen(ib) - 1;
+    if (ib[i] == '\n')
+        ib[i] = 0;
+
+    if (i >= 1 && ib[i - 1] == '\r')
+        ib[i - 1] = 0;
+
+    return 1;
 }
 
 /*)Function	int	more()
@@ -452,9 +459,9 @@ loop:	if (incfil >= 0) {
 
 int more(void)
 {
-	int c = getnb();
-	unget(c);
-	return ((c == '\0' || c == ';') ? 0 : 1);
+    int c = getnb();
+    unget(c);
+    return ((c == '\0' || c == ';') ? 0 : 1);
 }
 
 /*)Function	char	endline()
@@ -481,7 +488,7 @@ int more(void)
 
 char endline(void)
 {
-	int c = getnb();
+    int c = getnb();
 
-	return ((c == '\0' || c == ';') ? 0 : c);
+    return ((c == '\0' || c == ';') ? 0 : c);
 }

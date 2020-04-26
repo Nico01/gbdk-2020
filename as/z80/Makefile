@@ -7,7 +7,7 @@ OBJDIR	= obj/$(EXT)
 SDC	= .
 
 SRC	= asdata.c asexpr.c aslex.c aslist.c asmain.c asout.c \
-	  assubr.c assym.c z80adr.c z80ext.c z80mch.c z80pst.c
+	  assubr.c assym.c gbadr.c gbext.c gbmch.c gbpst.c
 
 OBJS	= $(SRC:%.c=$(OBJDIR)/%.o)
 

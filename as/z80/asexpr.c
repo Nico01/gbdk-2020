@@ -1,4 +1,4 @@
-/* asexpr.c */
+// asexpr.c
 
 /*
  * (C) Copyright 1989-1995
@@ -9,8 +9,8 @@
  * Kent, Ohio  44240
  */
 
-#include <stdio.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "asm.h"
@@ -81,106 +81,99 @@
 
 void expr(struct expr *esp, int n)
 {
-        int c, p;
-        struct area *ap;
-        struct expr re;
+    int c, p;
+    struct area *ap;
+    struct expr re;
 
-        term(esp);
-        while (ctype[c = getnb()] & BINOP) {
-		/*
-		 * Handle binary operators + - * / & | % ^ << >>
-		 */
-                if ((p = oprio(c)) <= n)
-                        break;
-                if ((c == '>' || c == '<') && c != get())
-                        qerr();
-		clrexpr(&re);
-                expr(&re, p);
-		esp->e_rlcf |= re.e_rlcf;
-                if (c == '+') {
-			/*
-			 * esp + re, at least one must be absolute
-			 */
-                        if (esp->e_base.e_ap == NULL) {
-				/*
-				 * esp is absolute (constant),
-				 * use area from re
-				 */
-                                esp->e_base.e_ap = re.e_base.e_ap;
-                        } else
-                        if (re.e_base.e_ap) {
-				/*
-				 * re should be absolute (constant)
-				 */
-                                rerr();
-                        }
-                        if (esp->e_flag && re.e_flag)
-                                rerr();
-                        if (re.e_flag)
-                                esp->e_flag = 1;
-                        esp->e_addr += re.e_addr;
-                } else
-                if (c == '-') {
-			/*
-			 * esp - re
-			 */
-                        if ((ap = re.e_base.e_ap) != NULL) {
-                                if (esp->e_base.e_ap == ap) {
-                                        esp->e_base.e_ap = NULL;
-                                } else {
-                                        rerr();
-                                }
-                        }
-                        if (re.e_flag)
-                                rerr();
-                        esp->e_addr -= re.e_addr;
-                } else {
-			/*
-			 * Both operands (esp and re) must be constants
-			 */
-                        abscheck(esp);
-                        abscheck(&re);
-                        switch (c) {
+    term(esp);
+    while (ctype[c = getnb()] & BINOP) {
+        // Handle binary operators + - * / & | % ^ << >>
+        if ((p = oprio(c)) <= n)
+            break;
+        if ((c == '>' || c == '<') && c != get())
+            qerr();
+        clrexpr(&re);
+        expr(&re, p);
+        esp->e_rlcf |= re.e_rlcf;
+        if (c == '+') {
+            // esp + re, at least one must be absolute
 
-                        case '*':
-                                esp->e_addr *= re.e_addr;
-                                break;
+            if (esp->e_base.e_ap == NULL) {
+                // esp is absolute (constant), use area from re
 
-                        case '/':
-                                esp->e_addr /= re.e_addr;
-                                break;
+                esp->e_base.e_ap = re.e_base.e_ap;
+            }
+            else if (re.e_base.e_ap) {
+                // re should be absolute (constant)
 
-                        case '&':
-                                esp->e_addr &= re.e_addr;
-                                break;
-
-                        case '|':
-                                esp->e_addr |= re.e_addr;
-                                break;
-
-                        case '%':
-                                esp->e_addr %= re.e_addr;
-                                break;
-
-                        case '^':
-                                esp->e_addr ^= re.e_addr;
-                                break;
-
-                        case '<':
-                                esp->e_addr <<= re.e_addr;
-                                break;
-
-                        case '>':
-                                esp->e_addr >>= re.e_addr;
-                                break;
-
-			default:
-				qerr();
-				break;
-                        }
-                }
+                rerr();
+            }
+            if (esp->e_flag && re.e_flag)
+                rerr();
+            if (re.e_flag)
+                esp->e_flag = 1;
+            esp->e_addr += re.e_addr;
         }
-        unget(c);
+        else if (c == '-') {
+            // esp - re
+
+            if ((ap = re.e_base.e_ap) != NULL) {
+                if (esp->e_base.e_ap == ap) {
+                    esp->e_base.e_ap = NULL;
+                }
+                else {
+                    rerr();
+                }
+            }
+            if (re.e_flag)
+                rerr();
+            esp->e_addr -= re.e_addr;
+        }
+        else {
+            // Both operands (esp and re) must be constants
+            abscheck(esp);
+            abscheck(&re);
+            switch (c) {
+
+            case '*':
+                esp->e_addr *= re.e_addr;
+                break;
+
+            case '/':
+                esp->e_addr /= re.e_addr;
+                break;
+
+            case '&':
+                esp->e_addr &= re.e_addr;
+                break;
+
+            case '|':
+                esp->e_addr |= re.e_addr;
+                break;
+
+            case '%':
+                esp->e_addr %= re.e_addr;
+                break;
+
+            case '^':
+                esp->e_addr ^= re.e_addr;
+                break;
+
+            case '<':
+                esp->e_addr <<= re.e_addr;
+                break;
+
+            case '>':
+                esp->e_addr >>= re.e_addr;
+                break;
+
+            default:
+                qerr();
+                break;
+            }
+        }
+    }
+    unget(c);
 }
 
 /*)Function	Addr_T	absexpr()
@@ -209,10 +202,10 @@ Addr_T absexpr(void)
 {
     struct expr e;
 
-	clrexpr(&e);
-	expr(&e, 0);
-	abscheck(&e);
-	return e.e_addr;
+    clrexpr(&e);
+    expr(&e, 0);
+    abscheck(&e);
+    return e.e_addr;
 }
 
 /*)Function	VOID	term(esp)
@@ -262,209 +255,194 @@ Addr_T absexpr(void)
 
 void term(struct expr *esp)
 {
-        int c, n;
-        char *jp;
-        char id[NCPS];
-        struct sym  *sp;
-        struct tsym *tp;
-        int r = 0, v;
+    int c, n;
+    char *jp;
+    char id[NCPS];
+    struct sym *sp;
+    struct tsym *tp;
+    int r = 0, v;
 
+    c = getnb();
+    /* Discard the unary '+' at this point and also any reference to numerical arguments
+     * associated with the '#' prefix. */
+    while (c == '+' || c == '#') {
         c = getnb();
-	/*
- 	 * Discard the unary '+' at this point and
-	 * also any reference to numerical arguments
-	 * associated with the '#' prefix.
-	 */
-        while (c == '+' || c == '#') { c = getnb(); }
-	/*
- 	 * Evaluate all binary operators
-	 * by recursively calling expr().
-	 */
-        if (c == LFTERM) {
-                expr(esp, 0);
-                if (getnb() != RTTERM)
-                        qerr();
-                return;
+    }
+    // Evaluate all binary operators by recursively calling expr().
+    if (c == LFTERM) {
+        expr(esp, 0);
+        if (getnb() != RTTERM)
+            qerr();
+        return;
+    }
+    if (c == '-') {
+        expr(esp, 100);
+        abscheck(esp);
+        esp->e_addr = 0 - esp->e_addr;
+        return;
+    }
+    if (c == '~') {
+        expr(esp, 100);
+        abscheck(esp);
+        esp->e_addr = ~esp->e_addr;
+        return;
+    }
+    if (c == '\'') {
+        esp->e_mode = S_USER;
+        esp->e_addr = getmap(-1) & 0377;
+        return;
+    }
+    if (c == '\"') {
+        esp->e_mode = S_USER;
+        if (hilo) {
+            esp->e_addr = (getmap(-1) & 0377) << 8;
+            esp->e_addr |= (getmap(-1) & 0377);
         }
-        if (c == '-') {
-                expr(esp, 100);
-                abscheck(esp);
-                esp->e_addr = 0 - esp->e_addr;
-                return;
+        else {
+            esp->e_addr = (getmap(-1) & 0377);
+            esp->e_addr |= (getmap(-1) & 0377) << 8;
         }
-        if (c == '~') {
-                expr(esp, 100);
-                abscheck(esp);
-                esp->e_addr = ~esp->e_addr;
-                return;
+        return;
+    }
+    if (c == '>' || c == '<') {
+        expr(esp, 100);
+        if (is_abs(esp)) {
+            // evaluate msb/lsb directly
+            if (c == '>')
+                esp->e_addr >>= 8;
+            esp->e_addr &= 0377;
+            return;
         }
-        if (c == '\'') {
-                esp->e_mode = S_USER;
-                esp->e_addr = getmap(-1)&0377;
-                return;
+        else {
+            // let linker perform msb/lsb, lsb is default
+            esp->e_rlcf |= R_BYT2;
+            if (c == '>')
+                esp->e_rlcf |= R_MSB;
+            return;
         }
-        if (c == '\"') {
-                esp->e_mode = S_USER;
-                if (hilo) {
-                    esp->e_addr  = (getmap(-1)&0377)<<8;
-                    esp->e_addr |= (getmap(-1)&0377);
-                } else {
-                    esp->e_addr  = (getmap(-1)&0377);
-                    esp->e_addr |= (getmap(-1)&0377)<<8;
-                }
-                return;
+    }
+    // Evaluate digit sequences as local symbols if followed by a '$' or as constants.
+    if (ctype[c] & DIGIT) {
+        esp->e_mode = S_USER;
+        jp = ip;
+        while (ctype[(unsigned char)(*jp)] & RAD10) {
+            jp++;
         }
-        if (c == '>' || c == '<') {
-                expr(esp, 100);
-		if (is_abs (esp)) {
-			/*
-			 * evaluate msb/lsb directly
-			 */
-			if (c == '>')
-				esp->e_addr >>= 8;
-			esp->e_addr &= 0377;
-			return;
-		} else {
-			/*
-			 * let linker perform msb/lsb, lsb is default
-			 */
-			esp->e_rlcf |= R_BYT2;
-			if (c == '>')
-				esp->e_rlcf |= R_MSB;
-			return;
-		}
-        }
-	/*
-	 * Evaluate digit sequences as local symbols
-	 * if followed by a '$' or as constants.
-	 */
-        if (ctype[c] & DIGIT) {
-                esp->e_mode = S_USER;
-                jp = ip;
-                 while (ctype[(unsigned char)(*jp)] & RAD10) {
-                        jp++;
-                }
-                if (*jp == '$') {
-                        n = 0;
-                        while ((v = digit(c, 10)) >= 0) {
-                                n = 10*n + v;
-                                c = get();
-                        }
-                        tp = symp->s_tsym;
-                        while (tp) {
-                                if (n == tp->t_num) {
-                                        esp->e_base.e_ap = tp->t_area;
-                                        esp->e_addr = tp->t_addr;
-                                        return;
-                                }
-                                tp = tp->t_lnk;
-                        }
-                        err('u');
-                        return;
-                }
-                r = radix;
-                if (c == '0') {
-                        c = get();
-                        switch (c) {
-                                case 'b':
-                                case 'B':
-                                        r = 2;
-                                        c = get();
-                                        break;
-                                case 'o':
-                                case 'O':
-                                case 'q':
-                                case 'Q':
-                                        r = 8;
-                                        c = get();
-                                        break;
-                                case 'd':
-                                case 'D':
-                                        r = 10;
-                                        c = get();
-                                        break;
-                                case 'h':
-                                case 'H':
-                                case 'x':
-                                case 'X':
-                                        r = 16;
-                                        c = get();
-                                        break;
-                                default:
-                                        break;
-                        }
-                }
-                n = 0;
-                while ((v = digit(c, r)) >= 0) {
-                        n = r*n + v;
-                        c = get();
-                }
-                unget(c);
-                esp->e_addr = n;
-                return;
-        }
-	/*
-	 * Evaluate '$' sequences as a temporary radix
-	 * if followed by a '%', '&', '#', or '$'.
-	 */
-        if (c == '$') {
+        if (*jp == '$') {
+            n = 0;
+            while ((v = digit(c, 10)) >= 0) {
+                n = 10 * n + v;
                 c = get();
-                if (c == '%' || c == '&' || c == '#' || c == '$') {
-	                switch (c) {
-	        	        case '%':
-        		                r = 2;
-        		                break;
-        		        case '&':
-        		                r = 8;
-        		                break;
-        		        case '#':
-        		                r = 10;
-        		                break;
-        		        case '$':
-        		                r = 16;        	                
-        		                break;
-        		        default:
-        		                break;
-        	        }
-        	        c = get();
-        	        n = 0;
-        	        while ((v = digit(c, r)) >= 0) {
-        	                n = r*n + v;
-        	                c = get();
-        	        }
-        	        unget(c);
-	                esp->e_mode = S_USER;
-        	        esp->e_addr = n;
-        	        return;
-        	}
-        	unget(c);
-        	c = '$';
-        }
-	/*
-	 * Evaluate symbols and labels
-	 */
-        if (ctype[c] & LETTER) {
-                esp->e_mode = S_USER;
-                getid(id, c);
-                sp = lookup(id);
-                if (sp->s_type == S_NEW) {
-			if (sp->s_flag&S_GBL) {
-				esp->e_flag = 1;
-				esp->e_base.e_sp = sp;
-				return;
-			}
-			err('u');
-                } else {
-                        esp->e_mode = sp->s_type;
-                        esp->e_addr = sp->s_addr;
-                        esp->e_base.e_ap = sp->s_area;
+            }
+            tp = symp->s_tsym;
+            while (tp) {
+                if (n == tp->t_num) {
+                    esp->e_base.e_ap = tp->t_area;
+                    esp->e_addr = tp->t_addr;
+                    return;
                 }
-                return;
+                tp = tp->t_lnk;
+            }
+            err('u');
+            return;
         }
-	/*
-	 * Else not a term.
-	 */
-        qerr();
+        r = radix;
+        if (c == '0') {
+            c = get();
+            switch (c) {
+            case 'b':
+            case 'B':
+                r = 2;
+                c = get();
+                break;
+            case 'o':
+            case 'O':
+            case 'q':
+            case 'Q':
+                r = 8;
+                c = get();
+                break;
+            case 'd':
+            case 'D':
+                r = 10;
+                c = get();
+                break;
+            case 'h':
+            case 'H':
+            case 'x':
+            case 'X':
+                r = 16;
+                c = get();
+                break;
+            default:
+                break;
+            }
+        }
+        n = 0;
+        while ((v = digit(c, r)) >= 0) {
+            n = r * n + v;
+            c = get();
+        }
+        unget(c);
+        esp->e_addr = n;
+        return;
+    }
+    // Evaluate '$' sequences as a temporary radix if followed by a '%', '&', '#', or '$'.
+    if (c == '$') {
+        c = get();
+        if (c == '%' || c == '&' || c == '#' || c == '$') {
+            switch (c) {
+            case '%':
+                r = 2;
+                break;
+            case '&':
+                r = 8;
+                break;
+            case '#':
+                r = 10;
+                break;
+            case '$':
+                r = 16;
+                break;
+            default:
+                break;
+            }
+            c = get();
+            n = 0;
+            while ((v = digit(c, r)) >= 0) {
+                n = r * n + v;
+                c = get();
+            }
+            unget(c);
+            esp->e_mode = S_USER;
+            esp->e_addr = n;
+            return;
+        }
+        unget(c);
+        c = '$';
+    }
+    // Evaluate symbols and labels
+    if (ctype[c] & LETTER) {
+        esp->e_mode = S_USER;
+        getid(id, c);
+        sp = lookup(id);
+        if (sp->s_type == S_NEW) {
+            if (sp->s_flag & S_GBL) {
+                esp->e_flag = 1;
+                esp->e_base.e_sp = sp;
+                return;
+            }
+            err('u');
+        }
+        else {
+            esp->e_mode = sp->s_type;
+            esp->e_addr = sp->s_addr;
+            esp->e_base.e_ap = sp->s_area;
+        }
+        return;
+    }
+    // Else not a term.
+    qerr();
 }
 
 /*)Function	int	digit(c, r)
@@ -492,28 +470,28 @@ void term(struct expr *esp)
 
 int digit(int c, int r)
 {
-        if (r == 16) {
-                if (ctype[c] & RAD16) {
-                        if (c >= 'A' && c <= 'F')
-                                return (c - 'A' + 10);
-                        if (c >= 'a' && c <= 'f')
-                                return (c - 'a' + 10);
-                        return (c - '0');
-                }
-        } else
-        if (r == 10) {
-                if (ctype[c] & RAD10)
-                        return (c - '0');
-        } else
-        if (r == 8) {
-                if (ctype[c] & RAD8)
-                        return (c - '0');
-        } else
-        if (r == 2) {
-                if (ctype[c] & RAD2)
-                        return (c - '0');
+    if (r == 16) {
+        if (ctype[c] & RAD16) {
+            if (c >= 'A' && c <= 'F')
+                return (c - 'A' + 10);
+            if (c >= 'a' && c <= 'f')
+                return (c - 'a' + 10);
+            return (c - '0');
         }
-        return (-1);
+    }
+    else if (r == 10) {
+        if (ctype[c] & RAD10)
+            return (c - '0');
+    }
+    else if (r == 8) {
+        if (ctype[c] & RAD8)
+            return (c - '0');
+    }
+    else if (r == 2) {
+        if (ctype[c] & RAD2)
+            return (c - '0');
+    }
+    return (-1);
 }
 
 /*)Function	VOID	abscheck(esp)
@@ -545,11 +523,11 @@ int digit(int c, int r)
 
 void abscheck(struct expr *esp)
 {
-        if (esp->e_flag || esp->e_base.e_ap) {
-                esp->e_flag = 0;
-                esp->e_base.e_ap = NULL;
-                rerr();
-        }
+    if (esp->e_flag || esp->e_base.e_ap) {
+        esp->e_flag = 0;
+        esp->e_base.e_ap = NULL;
+        rerr();
+    }
 }
 
 /*)Function	int	is_abs(esp)
@@ -582,7 +560,7 @@ int is_abs(struct expr *esp)
     if (esp->e_flag || esp->e_base.e_ap)
         return 0;
 
-	return 1;
+    return 1;
 }
 
 /*)Function	int	oprio(c)
@@ -604,22 +582,22 @@ int is_abs(struct expr *esp)
  *	side effects:
  *		none
  */
- 
+
 int oprio(int c)
 {
-        if (c == '*' || c == '/' || c == '%')
-                return (10);
-        if (c == '+' || c == '-')
-                return (7);
-        if (c == '<' || c == '>')
-                return (5);
-        if (c == '^')
-                return (4);
-        if (c == '&')
-                return (3);
-        if (c == '|')
-                return (1);
-        return (0);
+    if (c == '*' || c == '/' || c == '%')
+        return (10);
+    if (c == '+' || c == '-')
+        return (7);
+    if (c == '<' || c == '>')
+        return (5);
+    if (c == '^')
+        return (4);
+    if (c == '&')
+        return (3);
+    if (c == '|')
+        return (1);
+    return (0);
 }
 
 /*)Function	VOID	clrexpr(esp)
@@ -640,12 +618,12 @@ int oprio(int c)
  *	side effects:
  *		expression structure cleared.
  */
- 
+
 void clrexpr(struct expr *esp)
 {
-	esp->e_mode = 0;
-	esp->e_flag = 0;
-	esp->e_addr = 0;
-	esp->e_base.e_ap = NULL;
-	esp->e_rlcf = 0;
+    esp->e_mode = 0;
+    esp->e_flag = 0;
+    esp->e_addr = 0;
+    esp->e_base.e_ap = NULL;
+    esp->e_rlcf = 0;
 }

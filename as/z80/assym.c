@@ -1,4 +1,4 @@
-/* assym.c */
+// assym.c
 
 /*
  * (C) Copyright 1989-1995
@@ -9,16 +9,11 @@
  * Kent, Ohio  44240
  */
 
-#include <stdio.h>
-#include <setjmp.h>
-#include <string.h>
-#if defined(__APPLE__) && defined(__MACH__)
-#include <sys/types.h>
-#include <sys/malloc.h>
-#else
-#include <malloc.h>
-#endif
 #include "asm.h"
+#include <malloc.h>
+#include <setjmp.h>
+#include <stdio.h>
+#include <string.h>
 
 /*)Module	assym.c
  *
@@ -31,7 +26,7 @@
  *		int	hash()
  *		sym *	lookup()
  *		mne *	mlookup()
- *		VOID *	new()
+ *		void *gb_malloc(size_t n)
  *		int	symeq()
  *		VOID	syminit()
  *		VOID	symglob()
@@ -80,39 +75,39 @@
 
 void syminit(void)
 {
-	struct mne  *mp;
-	struct mne **mpp;
-	struct sym  *sp;
-	struct sym **spp;
-	int h;
+    struct mne **mpp = &mnehash[0];
 
-	mpp = &mnehash[0];
-	while (mpp < &mnehash[NHASH])
-		*mpp++ = NULL;
-	mp = &mne[0];
-	for (;;) {
-		h = hash(mp->m_id);
-		mp->m_mp = mnehash[h];
-		mnehash[h] = mp;
-		if (mp->m_flag&S_END)
-			break;
-		++mp;
-	}
+    while (mpp < &mnehash[NHASH])
+        *mpp++ = NULL;
 
-	spp = &symhash[0];
-	while (spp < &symhash[NHASH])
-		*spp++ = NULL;
-	sp = &sym[0];
-	for (;;) {
-		h = hash(sp->s_id);
-		sp->s_sp = symhash[h];
-		symhash[h] = sp;
-		if (sp->s_flag&S_END)
-			break;
-		++sp;
-	}
+    struct mne *mp = &mne[0];
 
-	areap = &dca;
+    for (;;) {
+        int h = hash(mp->m_id);
+        mp->m_mp = mnehash[h];
+        mnehash[h] = mp;
+        if (mp->m_flag & S_END)
+            break;
+        ++mp;
+    }
+
+    struct sym **spp = &symhash[0];
+
+    while (spp < &symhash[NHASH])
+        *spp++ = NULL;
+
+    struct sym *sp = &sym[0];
+
+    for (;;) {
+        int h = hash(sp->s_id);
+        sp->s_sp = symhash[h];
+        symhash[h] = sp;
+        if (sp->s_flag & S_END)
+            break;
+        ++sp;
+    }
+
+    areap = &dca;
 }
 
 /*)Function	area *	alookup(id)
@@ -138,15 +133,15 @@ void syminit(void)
 
 struct area *alookup(char *id)
 {
-	struct area *ap = areap;
+    struct area *ap = areap;
 
-	while (ap) {
-		if (symeq(id, ap->a_id)) {
-			return ap;
-		}
-		ap = ap->a_ap;
-	}
-	return NULL;
+    while (ap) {
+        if (symeq(id, ap->a_id)) {
+            return ap;
+        }
+        ap = ap->a_ap;
+    }
+    return NULL;
 }
 
 /*)Function	mne *	mlookup(id)
@@ -174,15 +169,15 @@ struct area *alookup(char *id)
 
 struct mne *mlookup(char *id)
 {
-	int h = hash(id);
-	struct mne *mp = mnehash[h];
+    int h = hash(id);
+    struct mne *mp = mnehash[h];
 
-	while (mp) {
-		if (symeq(id, mp->m_id))
-			return mp;
-		mp = mp->m_mp;
-	}
-	return NULL;
+    while (mp) {
+        if (symeq(id, mp->m_id))
+            return mp;
+        mp = mp->m_mp;
+    }
+    return NULL;
 }
 
 /*)Function	sym *	lookup(id)
@@ -205,36 +200,37 @@ struct mne *mlookup(char *id)
  *
  *	functions called:
  *		int	hash()		assym.c
- *		VOID *	new()		assym.c
+ *		VOID *	gb_malloc()		assym.c
  *		int	symeq()		assym.c
  *
  *	side effects:
- *		If the function new() fails to allocate space
+ *		If the function gb_malloc() fails to allocate space
  *		for the new sym structure the assembly terminates.
  */
 
 struct sym *lookup(char *id)
 {
-	int h = hash(id);
-	struct sym *sp = symhash[h];
+    int h = hash(id);
+    struct sym *sp = symhash[h];
 
-	while (sp) {
-		if (symeq(id, sp->s_id))
-			return (sp);
-		sp = sp->s_sp;
-	}
+    while (sp) {
+        if (symeq(id, sp->s_id))
+            return (sp);
+        sp = sp->s_sp;
+    }
 
-	sp = (struct sym *) new (sizeof(struct sym));
-	sp->s_sp = symhash[h];
-	symhash[h] = sp;
-	sp->s_tsym = NULL;
-	strncpy(sp->s_id, id, NCPS);
-	sp->s_type = S_NEW;
-	sp->s_flag = 0;
-	sp->s_area = NULL;
-	sp->s_ref = 0;
-	sp->s_addr = 0;
-	return (sp);
+    sp = gb_malloc(sizeof(struct sym));
+    sp->s_sp = symhash[h];
+    symhash[h] = sp;
+    sp->s_tsym = NULL;
+    strncpy(sp->s_id, id, NCPS);
+    sp->s_type = S_NEW;
+    sp->s_flag = 0;
+    sp->s_area = NULL;
+    sp->s_ref = 0;
+    sp->s_addr = 0;
+
+    return sp;
 }
 
 /*)Function	VOID	symglob()
@@ -260,16 +256,16 @@ struct sym *lookup(char *id)
 
 void symglob(void)
 {
-	struct sym *sp;
+    struct sym *sp;
 
-	for (int i=0; i<NHASH; ++i) {
-		sp = symhash[i];
-		while (sp != NULL) {
-			if (sp->s_type == S_NEW)
-				sp->s_flag |= S_GBL;
-			sp = sp->s_sp;
-		}
-	}
+    for (int i = 0; i < NHASH; ++i) {
+        sp = symhash[i];
+        while (sp != NULL) {
+            if (sp->s_type == S_NEW)
+                sp->s_flag |= S_GBL;
+            sp = sp->s_sp;
+        }
+    }
 }
 
 /*)Function	VOID	allglob()
@@ -295,16 +291,16 @@ void symglob(void)
 
 void allglob(void)
 {
-	struct sym *sp;
+    struct sym *sp;
 
-	for (int i=0; i<NHASH; ++i) {
-		sp = symhash[i];
-		while (sp != NULL) {
-			if (sp != &dot && sp->s_type == S_USER)
-				sp->s_flag |= S_GBL;
-			sp = sp->s_sp;
-		}
-	}
+    for (int i = 0; i < NHASH; ++i) {
+        sp = symhash[i];
+        while (sp != NULL) {
+            if (sp != &dot && sp->s_type == S_USER)
+                sp->s_flag |= S_GBL;
+            sp = sp->s_sp;
+        }
+    }
 }
 
 /*)Function	int	symeq(p1, p2)
@@ -332,20 +328,20 @@ void allglob(void)
 
 int symeq(char *p1, char *p2)
 {
-	int n = NCPS;
-	do {
+    int n = NCPS;
+    do {
 
-#if	CASE_SENSITIVE
-		if (*p1++ != *p2++)
-			return 0;
+#if CASE_SENSITIVE
+        if (*p1++ != *p2++)
+            return 0;
 #else
-		if (ccase[(unsigned char)(*p1++)] != ccase[(unsigned char)(*p2++)])
-			return 0;
+        if (ccase[(unsigned char)(*p1++)] != ccase[(unsigned char)(*p2++)])
+            return 0;
 #endif
 
-	} while (--n);
+    } while (--n);
 
-	return 1;
+    return 1;
 }
 
 /*)Function	int	hash(p)
@@ -369,56 +365,56 @@ int symeq(char *p1, char *p2)
  *	side effects:
  *		none
  */
- 
+
 int hash(char *p)
 {
-	int h = 0;
-	int n = NCPS;
-	do {
+    int h = 0;
+    int n = NCPS;
+    do {
 
-#if	CASE_SENSITIVE
-		h += *p++;
+#if CASE_SENSITIVE
+        h += *p++;
 #else
-		h += ccase[(unsigned char)(*p++)];
+        h += ccase[(unsigned char)(*p++)];
 #endif
 
-	} while (--n);
+    } while (--n);
 
-	return (h&HMASK);
+    return (h & HMASK);
 }
 
-/*)Function	VOID *	new(n)
+/*)Function	void *gb_malloc(size_t n)
  *
- *		unsigned int	n	allocation size in bytes
+ *	size_t n allocation size in bytes
  *
- *	The function new() allocates n bytes of space and returns
+ *	The function gb_malloc(size_t n) allocates n bytes of space and returns
  *	a pointer to this memory.  If no space is available the
  *	assembly is terminated.
  *
  *	local variables:
- *		VOID *	p		a general pointer
+ *		void *	p		a general pointer
  *
  *	global variables:
  *		none
  *
  *	functions called:
- *		VOID	asexit()	asmain.c
+ *		void	asexit()	asmain.c
  *		int	fprintf()	c_library
- *		VOID *	malloc()	c_library
+ *		void *	malloc()	c_library
  *
  *	side effects:
  *		Memory is allocated, if allocation fails
  *		the assembly is terminated.
  */
 
-char *new(unsigned int n)
+void *gb_malloc(size_t n)
 {
-	char *p = malloc(n);
+    void *p = malloc(n);
 
-	if (p == NULL) {
-		fprintf(stderr, "Out of space!\n");
-		asexit(1);
-	}
+    if (p == NULL) {
+        fprintf(stderr, "Out of space!\n");
+        asexit(1);
+    }
 
-	return p;
+    return p;
 }
