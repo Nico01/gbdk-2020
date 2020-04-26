@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #ifdef __WIN32__
 #include <windows.h>

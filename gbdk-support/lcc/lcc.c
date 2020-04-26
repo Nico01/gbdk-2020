@@ -47,9 +47,6 @@ extern char *stringf(const char *, ...);
 extern int suffix(char *, char *[], int);
 extern char *tempname(char *);
 
-extern int access(char *, int);
-//extern int getpid(void);
-
 extern char *cpp[], *include[], *com[], *as[],*ld[], inputs[], *suffixes[];
 extern int option(char *);
 extern void set_gbdk_dir(char*);
@@ -96,7 +93,7 @@ int main(int argc, char *argv[]) {
 		tempdir = getenv("TMPDIR");
 	assert(tempdir);
 	i = strlen(tempdir);
-	for (; i > 0 && tempdir[i-1] == '/' || tempdir[i-1] == '\\'; i--)
+	for (; i > 0 && (tempdir[i-1] == '/' || tempdir[i-1] == '\\'); i--)
 		tempdir[i-1] = '\0';
 	if (argc <= 1) {
 		help();
@@ -154,8 +151,7 @@ int main(int argc, char *argv[]) {
 		else {
 			char *name = exists(argv[i]);
 			if (name) {
-				if (strcmp(name, argv[i]) != 0
-				|| nf > 1 && suffix(name, suffixes, 3) >= 0)
+				if (strcmp(name, argv[i]) != 0 || nf > 1 && suffix(name, suffixes, 3) >= 0)
 					fprintf(stderr, "%s:\n", name);
 				filename(name, 0);
 			} else
@@ -218,9 +214,9 @@ char *basepath(char *name) {
 #include <process.h>
 #else
 #define _P_WAIT 0
-extern int fork(void);
-extern int wait(int *);
-extern void execv(const char *, char *[]);
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 static int _spawnvp(int mode, const char *cmdname, char *argv[]) {
 	int pid, n, status;
@@ -325,7 +321,7 @@ static void compose(char *cmd[], List a, List b, List c) {
 		if (s && isdigit(s[1])) {
 			int k = s[1] - '0';
 			assert(k >=1 && k <= 3);
-			if (b = lists[k-1]) {
+			if ((b = lists[k-1])) {
 				b = b->link;
 				av[j] = alloc(strlen(cmd[i]) + strlen(b->str) - 1);
 				strncpy(av[j], cmd[i], s - cmd[i]);
@@ -458,7 +454,7 @@ static int filename(char *name, char *base) {
 static List find(char *str, List list) {
 	List b;
 	
-	if (b = list)
+	if ((b = list))
 		do {
 			if (strcmp(str, b->str) == 0)
 				return b;
@@ -533,7 +529,7 @@ static void initinputs(void) {
 		s = ".";
 	if (s) {
 		lccinputs = path2list(s);
-		if (b = lccinputs)
+		if ((b = lccinputs))
 			do {
 				b = b->link;
 				if (strcmp(b->str, ".") != 0) {
@@ -712,7 +708,7 @@ static List path2list(const char *path) {
 		sep = ';';
 	while (*path) {
 		char *p, buf[512];
-		if (p = strchr(path, sep)) {
+		if ((p = strchr(path, sep))) {
 			assert(p - path < sizeof buf);
 			strncpy(buf, path, p - path);
 			buf[p-path] = '\0';
@@ -764,10 +760,9 @@ char *strsave(const char *str) {
 char *stringf(const char *fmt, ...) {
 	char buf[1024];
 	va_list ap;
-	int n;
 
 	va_start(ap, fmt);
-	n = vsprintf(buf, fmt, ap);
+	vsprintf(buf, fmt, ap);
 	va_end(ap);
 	return strsave(buf);
 }
